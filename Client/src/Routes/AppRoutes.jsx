@@ -13,6 +13,7 @@ import ResumeBuilder from "../pages/ResumeBuilder";
 import MockInterview from "../pages/MockInterview";
 import History from "../pages/History";
 import Preview from "../pages/Preview";
+import AnalysisReport from "../pages/AnalysisReport";
 import ProtectedRoute from "../Component/ProtectedRoute";
 
 const AppRoutes = () => {
@@ -32,13 +33,12 @@ const AppRoutes = () => {
         {/* App with Sidebar Layout */}
         <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
-          <Route path="history" element={<History />} />
-          <Route path="mock" element={<MockInterview />} />
           <Route path="builder/:resumeId" element={<ResumeBuilder />} />
+          <Route path="report/:resumeId" element={<AnalysisReport />} />
+          <Route path="interview" element={<MockInterview />} />
+          <Route path="history" element={<History />} />
+          <Route path="preview" element={<Preview />} />
         </Route>
-
-        {/* Preview */}
-        <Route path="/view/:resumeId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
 
       </Routes>
     </BrowserRouter>

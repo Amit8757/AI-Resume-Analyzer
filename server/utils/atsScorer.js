@@ -1,266 +1,296 @@
 /**
- * Calculate ATS score based on resume content and job description
+ * Enhanced ATS Scorer with Job Gap Analysis
+ * Calculates ATS score and provides detailed analysis
+ */
+
+/**
+ * Calculate comprehensive ATS analysis
  */
 export const calculateATSScore = (resumeText, jobDescription, resumeSections) => {
-    let score = 0;
-    const maxScore = 100;
-    const suggestions = [];
-    const keywordsMatched = [];
+    const analysis = {
+        atsScore: 0,
+        skillsMatch: 'Missing',
+        experienceLevel: 'Junior',
+        keywordsStatus: 'Missing',
+        matchedKeywords: [],
+        missingKeywords: [],
+        suggestions: [],
+        interviewQuestions: [],
+        feedback: ''
+    };
 
     // Extract keywords from job description
     const jdKeywords = extractJobKeywords(jobDescription);
 
-    // 1. Keyword Matching (50 points) - Increased weight
-    const keywordScore = matchKeywords(resumeText, jdKeywords, keywordsMatched);
-    score += keywordScore;
+    // 1. Keyword Matching (40 points)
+    const keywordScore = matchKeywords(resumeText, jdKeywords, analysis.matchedKeywords, analysis.missingKeywords);
+    analysis.atsScore += keywordScore;
 
-    if (keywordScore < 35) {
-        suggestions.push('⚠️ Add more relevant keywords from the job description to your resume');
-        suggestions.push(`💡 Focus on these missing keywords: ${keywordsMatched.filter(k => !k.found).slice(0, 5).map(k => k.keyword).join(', ')}`);
-    }
+    // 2. Section Completeness (30 points)
+    const sectionScore = checkSections(resumeSections, analysis.suggestions);
+    analysis.atsScore += sectionScore;
 
-    // 2. Resume Structure (25 points)
-    const structureScore = evaluateStructure(resumeSections);
-    score += structureScore;
+    // 3. Experience Level Detection (15 points)
+    const experienceScore = detectExperience(resumeText, analysis);
+    analysis.atsScore += experienceScore;
 
-    if (!resumeSections.hasContactInfo) {
-        suggestions.push('📧 Add clear contact information (email, phone, LinkedIn)');
-    }
-    if (!resumeSections.hasExperience) {
-        suggestions.push('💼 Include a detailed work experience section');
-    }
-    if (!resumeSections.hasEducation) {
-        suggestions.push('🎓 Add your educational background');
-    }
-    if (!resumeSections.hasSkills) {
-        suggestions.push('⚡ Create a dedicated skills section');
-    }
-    if (!resumeSections.hasSummary) {
-        suggestions.push('📝 Add a professional summary or objective statement');
-    }
+    // 4. Skills Match Analysis (15 points)
+    const skillsScore = analyzeSkills(resumeText, jobDescription, analysis);
+    analysis.atsScore += skillsScore;
 
-    // 3. Content Quality (25 points)
-    const contentScore = evaluateContent(resumeText);
-    score += contentScore;
+    // Generate feedback message
+    analysis.feedback = generateFeedback(analysis);
 
-    if (resumeText.length < 500) {
-        suggestions.push('📄 Expand your resume with more detailed descriptions of your experience');
-    }
+    // Generate interview questions
+    analysis.interviewQuestions = generateInterviewQuestions(analysis.matchedKeywords, analysis.experienceLevel);
 
-    // Action verbs check
-    const actionVerbs = ['developed', 'implemented', 'managed', 'led', 'created', 'designed',
-        'improved', 'achieved', 'built', 'launched', 'optimized', 'delivered',
-        'coordinated', 'executed', 'established', 'streamlined'];
-    const hasActionVerbs = actionVerbs.some(verb => resumeText.toLowerCase().includes(verb));
-    if (!hasActionVerbs) {
-        suggestions.push('💪 Use strong action verbs to describe your accomplishments (e.g., developed, implemented, managed)');
-    }
+    // Determine overall status
+    analysis.keywordsStatus = analysis.matchedKeywords.length > analysis.missingKeywords.length ? 'Match' : 'Missing';
 
-    // Quantifiable achievements
-    const hasNumbers = /\d+%|\d+\+|increased|decreased|reduced|improved by|\$\d+|saved \d+/i.test(resumeText);
-    if (!hasNumbers) {
-        suggestions.push('📊 Include quantifiable achievements (e.g., "Increased sales by 25%", "Managed team of 10")');
-    }
-
-    // Check for common ATS-friendly formatting
-    const hasProperFormatting = checkFormatting(resumeText);
-    if (!hasProperFormatting.hasBulletPoints) {
-        suggestions.push('• Use bullet points to organize your experience and achievements');
-    }
-
-    // Industry-specific keywords
-    const industryKeywords = extractIndustryKeywords(jobDescription);
-    const industryMatches = industryKeywords.filter(kw =>
-        resumeText.toLowerCase().includes(kw.toLowerCase())
-    );
-
-    if (industryMatches.length < industryKeywords.length * 0.5) {
-        suggestions.push(`🎯 Include more industry-specific terms: ${industryKeywords.slice(0, 3).join(', ')}`);
-    }
-
-    return {
-        atsScore: Math.min(Math.round(score), maxScore),
-        keywordsMatched,
-        suggestions: suggestions.slice(0, 8), // Limit to top 8 suggestions
-        breakdown: {
-            keywordScore: Math.round(keywordScore),
-            structureScore: Math.round(structureScore),
-            contentScore: Math.round(contentScore)
-        }
-    };
+    return analysis;
 };
 
 /**
- * Extract keywords from job description
+ * Extract important keywords from job description
  */
 const extractJobKeywords = (jobDescription) => {
+    const jd = jobDescription.toLowerCase();
     const keywords = new Set();
-    const lowerJD = jobDescription.toLowerCase();
 
-    // Comprehensive technical skills and tools
-    const techTerms = [
-        // Programming Languages
-        'javascript', 'python', 'java', 'c++', 'c#', 'ruby', 'php', 'swift', 'kotlin', 'go', 'rust', 'typescript',
-
-        // Frontend
-        'react', 'angular', 'vue', 'html', 'css', 'sass', 'less', 'tailwind', 'bootstrap', 'jquery',
-        'next.js', 'nuxt', 'gatsby', 'webpack', 'vite',
-
-        // Backend
-        'node.js', 'express', 'django', 'flask', 'spring', 'asp.net', 'laravel', 'rails',
-        'fastapi', 'nestjs',
-
-        // Databases
-        'mongodb', 'mysql', 'postgresql', 'sql', 'nosql', 'redis', 'elasticsearch', 'oracle',
-        'dynamodb', 'cassandra', 'sqlite',
-
-        // Cloud & DevOps
-        'aws', 'azure', 'gcp', 'google cloud', 'docker', 'kubernetes', 'jenkins', 'ci/cd',
-        'terraform', 'ansible', 'linux', 'nginx', 'apache',
-
-        // Tools & Methodologies
-        'git', 'github', 'gitlab', 'bitbucket', 'jira', 'confluence', 'agile', 'scrum', 'kanban',
-        'rest api', 'graphql', 'microservices', 'serverless',
-
-        // Data & AI
-        'machine learning', 'ai', 'deep learning', 'tensorflow', 'pytorch', 'pandas', 'numpy',
-        'data analysis', 'data science', 'big data', 'spark', 'hadoop',
-
-        // Testing
-        'jest', 'mocha', 'pytest', 'junit', 'selenium', 'cypress', 'testing', 'tdd', 'unit testing',
-
-        // Soft Skills
-        'leadership', 'communication', 'problem solving', 'teamwork', 'collaboration',
-        'project management', 'analytical', 'critical thinking'
+    // Technical skills
+    const technicalSkills = [
+        'javascript', 'python', 'java', 'react', 'angular', 'vue', 'node.js', 'express',
+        'mongodb', 'sql', 'postgresql', 'mysql', 'aws', 'azure', 'gcp', 'docker', 'kubernetes',
+        'git', 'ci/cd', 'agile', 'scrum', 'rest api', 'graphql', 'microservices',
+        'typescript', 'html', 'css', 'sass', 'webpack', 'redux', 'next.js', 'tailwind',
+        'spring boot', 'django', 'flask', 'laravel', 'php', 'ruby', 'rails',
+        'c++', 'c#', '.net', 'go', 'rust', 'swift', 'kotlin', 'flutter', 'react native',
+        'tensorflow', 'pytorch', 'machine learning', 'deep learning', 'ai', 'data science',
+        'cloud architecture', 'devops', 'jenkins', 'terraform', 'ansible',
+        'elasticsearch', 'redis', 'kafka', 'rabbitmq', 'nginx', 'apache'
     ];
 
-    techTerms.forEach(term => {
-        if (lowerJD.includes(term)) {
-            keywords.add(term);
+    technicalSkills.forEach(skill => {
+        if (jd.includes(skill)) {
+            keywords.add(skill);
         }
     });
 
-    // Extract words that appear multiple times (likely important)
-    const words = jobDescription.match(/\b[a-z]{3,}\b/gi) || [];
-    const wordFreq = {};
-    words.forEach(word => {
-        const lower = word.toLowerCase();
-        // Skip common words
-        const commonWords = ['the', 'and', 'for', 'with', 'this', 'that', 'will', 'have', 'from', 'they', 'been', 'were', 'their'];
-        if (!commonWords.includes(lower)) {
-            wordFreq[lower] = (wordFreq[lower] || 0) + 1;
+    // Soft skills
+    const softSkills = [
+        'leadership', 'communication', 'teamwork', 'problem solving', 'analytical',
+        'project management', 'collaboration', 'mentoring', 'strategic thinking'
+    ];
+
+    softSkills.forEach(skill => {
+        if (jd.includes(skill)) {
+            keywords.add(skill);
         }
     });
 
-    // Add frequently mentioned words (appears 2+ times)
-    Object.entries(wordFreq).forEach(([word, freq]) => {
-        if (freq >= 2 && word.length > 3) {
-            keywords.add(word);
-        }
-    });
+    // Extract years of experience
+    const yearsMatch = jd.match(/(\d+)\+?\s*years?/i);
+    if (yearsMatch) {
+        keywords.add(`${yearsMatch[1]}+ years experience`);
+    }
 
     return Array.from(keywords);
 };
 
 /**
- * Extract industry-specific keywords
- */
-const extractIndustryKeywords = (jobDescription) => {
-    const lowerJD = jobDescription.toLowerCase();
-    const industryTerms = [];
-
-    const industries = {
-        tech: ['software', 'development', 'engineering', 'programming', 'coding', 'technical'],
-        business: ['sales', 'marketing', 'business', 'strategy', 'revenue', 'growth'],
-        data: ['analytics', 'data', 'insights', 'metrics', 'reporting', 'visualization'],
-        design: ['design', 'ui', 'ux', 'user experience', 'interface', 'wireframe'],
-        management: ['management', 'leadership', 'team', 'project', 'stakeholder']
-    };
-
-    Object.values(industries).forEach(terms => {
-        terms.forEach(term => {
-            if (lowerJD.includes(term)) {
-                industryTerms.push(term);
-            }
-        });
-    });
-
-    return [...new Set(industryTerms)];
-};
-
-/**
  * Match keywords between resume and job description
  */
-const matchKeywords = (resumeText, jdKeywords, keywordsMatched) => {
-    const lowerResume = resumeText.toLowerCase();
-    let matchCount = 0;
-    let weightedScore = 0;
+const matchKeywords = (resumeText, jdKeywords, matchedKeywords, missingKeywords) => {
+    const resume = resumeText.toLowerCase();
+    let score = 0;
+    const maxScore = 40;
 
     jdKeywords.forEach(keyword => {
-        const found = lowerResume.includes(keyword.toLowerCase());
-        keywordsMatched.push({ keyword, found });
-
-        if (found) {
-            matchCount++;
-            // Give more weight to technical keywords
-            const isTechnical = keyword.length > 4 && !['leadership', 'communication', 'teamwork'].includes(keyword);
-            weightedScore += isTechnical ? 1.2 : 1;
+        if (resume.includes(keyword.toLowerCase())) {
+            matchedKeywords.push(keyword);
+            score += maxScore / jdKeywords.length;
+        } else {
+            missingKeywords.push(keyword);
         }
     });
 
-    // Calculate score out of 50 (increased from 40)
-    if (jdKeywords.length === 0) return 25; // Default score if no job description
-
-    const matchPercentage = weightedScore / jdKeywords.length;
-    return Math.min(Math.round(matchPercentage * 50), 50);
+    return Math.min(score, maxScore);
 };
 
 /**
- * Evaluate resume structure
+ * Check resume sections completeness
  */
-const evaluateStructure = (sections) => {
+const checkSections = (sections, suggestions) => {
     let score = 0;
+    const maxScore = 30;
+    const requiredSections = ['experience', 'education', 'skills'];
+    const optionalSections = ['summary', 'projects', 'certifications'];
 
-    if (sections.hasContactInfo) score += 5;
-    if (sections.hasExperience) score += 8;
-    if (sections.hasEducation) score += 5;
-    if (sections.hasSkills) score += 5;
-    if (sections.hasSummary) score += 2;
+    // Required sections (20 points)
+    requiredSections.forEach(section => {
+        if (sections[section]) {
+            score += 20 / requiredSections.length;
+        } else {
+            suggestions.push(`Add ${section} section to improve ATS score`);
+        }
+    });
 
-    return score; // Max 25 points
+    // Optional sections (10 points)
+    optionalSections.forEach(section => {
+        if (sections[section]) {
+            score += 10 / optionalSections.length;
+        }
+    });
+
+    return Math.min(score, maxScore);
 };
 
 /**
- * Evaluate content quality
+ * Detect experience level from resume
  */
-const evaluateContent = (resumeText) => {
+const detectExperience = (resumeText, analysis) => {
+    const text = resumeText.toLowerCase();
+    let score = 15;
+
+    // Look for years of experience
+    const yearsMatch = text.match(/(\d+)\+?\s*years?/i);
+    if (yearsMatch) {
+        const years = parseInt(yearsMatch[1]);
+        if (years >= 5) {
+            analysis.experienceLevel = 'Senior';
+            score = 15;
+        } else if (years >= 2) {
+            analysis.experienceLevel = 'Mid';
+            score = 12;
+        } else {
+            analysis.experienceLevel = 'Junior';
+            score = 10;
+        }
+    }
+
+    // Look for senior keywords
+    const seniorKeywords = ['senior', 'lead', 'principal', 'architect', 'manager', 'director'];
+    const hasSeniorKeywords = seniorKeywords.some(keyword => text.includes(keyword));
+
+    if (hasSeniorKeywords && analysis.experienceLevel !== 'Senior') {
+        analysis.experienceLevel = 'Senior';
+        score = 15;
+    }
+
+    return score;
+};
+
+/**
+ * Analyze skills match
+ */
+const analyzeSkills = (resumeText, jobDescription, analysis) => {
+    const resume = resumeText.toLowerCase();
+    const jd = jobDescription.toLowerCase();
     let score = 0;
+    const maxScore = 15;
 
-    // Length check (adequate content)
-    if (resumeText.length > 1000) score += 8;
-    else if (resumeText.length > 500) score += 5;
-    else if (resumeText.length > 300) score += 2;
+    // Extract skills from both
+    const resumeSkills = extractSkills(resume);
+    const jobSkills = extractSkills(jd);
 
-    // Action verbs
-    const actionVerbs = ['developed', 'implemented', 'managed', 'led', 'created', 'designed',
-        'improved', 'achieved', 'built', 'launched', 'optimized', 'delivered'];
-    const actionVerbCount = actionVerbs.filter(verb => resumeText.toLowerCase().includes(verb)).length;
-    score += Math.min(actionVerbCount * 1.5, 10);
+    if (jobSkills.length === 0) {
+        analysis.skillsMatch = 'Match';
+        return maxScore;
+    }
 
-    // Quantifiable achievements
-    const numberMatches = resumeText.match(/\d+%|\d+\+|\$\d+|increased by \d+|decreased by \d+/gi) || [];
-    score += Math.min(numberMatches.length * 2, 7);
+    const matchedCount = jobSkills.filter(skill => resumeSkills.includes(skill)).length;
+    const matchPercentage = (matchedCount / jobSkills.length) * 100;
 
-    return Math.min(score, 25); // Max 25 points
+    if (matchPercentage >= 75) {
+        analysis.skillsMatch = 'Match';
+        score = maxScore;
+    } else if (matchPercentage >= 50) {
+        analysis.skillsMatch = 'Partial';
+        score = maxScore * 0.7;
+        analysis.suggestions.push('Add more relevant skills from the job description');
+    } else {
+        analysis.skillsMatch = 'Missing';
+        score = maxScore * 0.4;
+        analysis.suggestions.push('Your skills do not closely match the job requirements');
+    }
+
+    return score;
 };
 
 /**
- * Check for ATS-friendly formatting
+ * Extract skills from text
  */
-const checkFormatting = (resumeText) => {
-    return {
-        hasBulletPoints: /[•\-\*]/.test(resumeText),
-        hasProperSpacing: resumeText.includes('\n'),
-        hasCapitalization: /[A-Z]/.test(resumeText)
-    };
+const extractSkills = (text) => {
+    const skills = new Set();
+    const skillKeywords = [
+        'javascript', 'python', 'java', 'react', 'angular', 'vue', 'node.js',
+        'mongodb', 'sql', 'aws', 'docker', 'kubernetes', 'git', 'agile',
+        'typescript', 'html', 'css', 'redux', 'next.js', 'express',
+        'leadership', 'communication', 'problem solving', 'teamwork'
+    ];
+
+    skillKeywords.forEach(skill => {
+        if (text.includes(skill)) {
+            skills.add(skill);
+        }
+    });
+
+    return Array.from(skills);
+};
+
+/**
+ * Generate feedback message
+ */
+const generateFeedback = (analysis) => {
+    if (analysis.atsScore >= 80) {
+        if (analysis.missingKeywords.length > 0) {
+            const keyword = analysis.missingKeywords[0];
+            return `Strong, but missing '${keyword}' keyword`;
+        }
+        return 'Excellent match! Your resume aligns well with the job requirements';
+    } else if (analysis.atsScore >= 60) {
+        return `Good match, but consider adding: ${analysis.missingKeywords.slice(0, 2).join(', ')}`;
+    } else {
+        return 'Needs improvement. Add more relevant keywords and skills';
+    }
+};
+
+/**
+ * Generate interview questions based on skills
+ */
+const generateInterviewQuestions = (matchedKeywords, experienceLevel) => {
+    const questions = [];
+
+    // Technical questions based on matched skills
+    if (matchedKeywords.includes('react') || matchedKeywords.includes('javascript')) {
+        questions.push('Explain the virtual DOM and how React uses it for performance optimization');
+        questions.push('What are React hooks and when would you use them?');
+    }
+
+    if (matchedKeywords.includes('node.js')) {
+        questions.push('How does Node.js handle asynchronous operations?');
+    }
+
+    if (matchedKeywords.includes('aws') || matchedKeywords.includes('cloud architecture')) {
+        questions.push('Describe your experience with cloud infrastructure and deployment');
+    }
+
+    // Experience-based questions
+    if (experienceLevel === 'Senior') {
+        questions.push('Describe a time when you led a team through a challenging project');
+        questions.push('How do you approach system design and architecture decisions?');
+    } else if (experienceLevel === 'Mid') {
+        questions.push('Tell me about a complex problem you solved recently');
+        questions.push('How do you stay updated with new technologies?');
+    } else {
+        questions.push('What interests you most about this role?');
+        questions.push('Describe a project you\'re proud of and your role in it');
+    }
+
+    // Leadership questions
+    if (matchedKeywords.includes('leadership') || matchedKeywords.includes('management')) {
+        questions.push('How do you handle conflicts within your team?');
+    }
+
+    return questions.slice(0, 5); // Return top 5 questions
 };

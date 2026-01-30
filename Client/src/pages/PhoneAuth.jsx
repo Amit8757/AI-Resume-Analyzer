@@ -4,6 +4,8 @@ import { Phone, ArrowLeft, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { sendOTP, verifyOTP, resendOTP } from '../services/authService';
 import { toast } from 'react-toastify';
+import AuthHeader from '../Component/AuthHeader';
+import AuthFooter from '../Component/AuthFooter';
 
 const PhoneAuth = () => {
     const navigate = useNavigate();
@@ -96,147 +98,153 @@ const PhoneAuth = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full">
-                {/* Back Button */}
-                <button
-                    onClick={() => step === 1 ? navigate('/login') : setStep(1)}
-                    className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
-                >
-                    <ArrowLeft size={20} />
-                    <span>Back</span>
-                </button>
+        <div className="min-h-screen flex flex-col">
+            <AuthHeader />
 
-                {/* Card */}
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Phone className="text-blue-600" size={32} />
+            <div className="flex-1 bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+                <div className="max-w-md w-full">
+                    {/* Back Button */}
+                    <button
+                        onClick={() => step === 1 ? navigate('/login') : setStep(1)}
+                        className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+                    >
+                        <ArrowLeft size={20} />
+                        <span>Back</span>
+                    </button>
+
+                    {/* Card */}
+                    <div className="bg-white rounded-2xl shadow-xl p-8">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Phone className="text-blue-600" size={32} />
+                            </div>
+                            <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                                {step === 1 ? 'Phone Login' : 'Verify OTP'}
+                            </h2>
+                            <p className="text-slate-600">
+                                {step === 1
+                                    ? 'Enter your phone number to receive a verification code'
+                                    : `We sent a code to ${phoneNumber}`
+                                }
+                            </p>
                         </div>
-                        <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                            {step === 1 ? 'Phone Login' : 'Verify OTP'}
-                        </h2>
-                        <p className="text-slate-600">
-                            {step === 1
-                                ? 'Enter your phone number to receive a verification code'
-                                : `We sent a code to ${phoneNumber}`
-                            }
-                        </p>
-                    </div>
 
-                    {/* Step 1: Phone Number Input */}
-                    {step === 1 && (
-                        <form onSubmit={handleSendOTP} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Phone Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    placeholder="+1 234 567 8900"
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    disabled={loading}
-                                />
-                                <p className="text-xs text-slate-500 mt-2">
-                                    Include country code (e.g., +1 for US, +91 for India)
-                                </p>
-                            </div>
+                        {/* Step 1: Phone Number Input */}
+                        {step === 1 && (
+                            <form onSubmit={handleSendOTP} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        placeholder="+1 234 567 8900"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        disabled={loading}
+                                    />
+                                    <p className="text-xs text-slate-500 mt-2">
+                                        Include country code (e.g., +1 for US, +91 for India)
+                                    </p>
+                                </div>
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader className="animate-spin" size={20} />
-                                        Sending OTP...
-                                    </>
-                                ) : (
-                                    'Send OTP'
-                                )}
-                            </button>
-                        </form>
-                    )}
-
-                    {/* Step 2: OTP Verification */}
-                    {step === 2 && (
-                        <form onSubmit={handleVerifyOTP} className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Your Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Enter your name"
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Verification Code
-                                </label>
-                                <input
-                                    type="text"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    placeholder="Enter 6-digit code"
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest font-semibold"
-                                    maxLength={6}
-                                    disabled={loading}
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader className="animate-spin" size={20} />
-                                        Verifying...
-                                    </>
-                                ) : (
-                                    'Verify & Login'
-                                )}
-                            </button>
-
-                            {/* Resend OTP */}
-                            <div className="text-center">
                                 <button
-                                    type="button"
-                                    onClick={handleResendOTP}
-                                    disabled={resendTimer > 0 || loading}
-                                    className="text-blue-600 hover:text-blue-700 font-medium disabled:text-slate-400 disabled:cursor-not-allowed"
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
+                                    {loading ? (
+                                        <>
+                                            <Loader className="animate-spin" size={20} />
+                                            Sending OTP...
+                                        </>
+                                    ) : (
+                                        'Send OTP'
+                                    )}
                                 </button>
-                            </div>
-                        </form>
-                    )}
+                            </form>
+                        )}
 
-                    {/* Divider */}
-                    <div className="mt-8 text-center">
-                        <p className="text-slate-600">
-                            Prefer email?{' '}
-                            <button
-                                onClick={() => navigate('/login')}
-                                className="text-blue-600 hover:text-blue-700 font-semibold"
-                            >
-                                Login with Email
-                            </button>
-                        </p>
+                        {/* Step 2: OTP Verification */}
+                        {step === 2 && (
+                            <form onSubmit={handleVerifyOTP} className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        Your Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Enter your name"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        Verification Code
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        placeholder="Enter 6-digit code"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest font-semibold"
+                                        maxLength={6}
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <Loader className="animate-spin" size={20} />
+                                            Verifying...
+                                        </>
+                                    ) : (
+                                        'Verify & Login'
+                                    )}
+                                </button>
+
+                                {/* Resend OTP */}
+                                <div className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={handleResendOTP}
+                                        disabled={resendTimer > 0 || loading}
+                                        className="text-blue-600 hover:text-blue-700 font-medium disabled:text-slate-400 disabled:cursor-not-allowed"
+                                    >
+                                        {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Resend OTP'}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        {/* Divider */}
+                        <div className="mt-8 text-center">
+                            <p className="text-slate-600">
+                                Prefer email?{' '}
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="text-blue-600 hover:text-blue-700 font-semibold"
+                                >
+                                    Login with Email
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <AuthFooter />
         </div>
     );
 };

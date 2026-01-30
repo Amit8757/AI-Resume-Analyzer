@@ -11,7 +11,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app" },
     { icon: History, label: "History", path: "/app/history" },
-    { icon: MessageSquare, label: "Mock Interview", path: "/app/mock" },
+    { icon: MessageSquare, label: "Mock Interview", path: "/app/interview" },
   ];
 
   const handleLogout = () => {
