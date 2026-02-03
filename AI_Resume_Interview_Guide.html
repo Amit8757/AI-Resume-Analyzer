@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer - Interview Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            page-break-inside: avoid;
+        }
+
+        .section h2 {
+            color: #2563eb;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section h3 {
+            color: #475569;
+            font-size: 1.3em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section h4 {
+            color: #64748b;
+            font-size: 1.1em;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tech-card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .tech-card h4 {
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        .tech-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tech-card li {
+            padding: 3px 0;
+            color: #475569;
+        }
+
+        .tech-card li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8fafc;
+            border-left: 4px solid #10b981;
+            border-radius: 4px;
+        }
+
+        .feature-list li strong {
+            color: #1e293b;
+        }
+
+        .question-block {
+            background: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+
+        .question-block .question {
+            font-weight: bold;
+            color: #92400e;
+            font-size: 1.05em;
+            margin-bottom: 10px;
+        }
+
+        .question-block .answer {
+            color: #451a03;
+            line-height: 1.7;
+        }
+
+        .answer ul, .section ul {
+            margin-left: 25px;
+            margin-top: 8px;
+        }
+
+        .answer li, .section li {
+            margin: 5px 0;
+        }
+
+        .highlight {
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            color: #1e40af;
+        }
+
+        .code-snippet {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .api-endpoint {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #475569;
+            margin: 5px 0;
+            display: inline-block;
+        }
+
+        .method {
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+
+        .method.post { background: #10b981; }
+        .method.get { background: #3b82f6; }
+        .method.put { background: #f59e0b; }
+        .method.delete { background: #ef4444; }
+
+        .tip-box {
+            background: #dcfce7;
+            border: 2px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .tip-box strong {
+            color: #065f46;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .architecture-flow {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .arrow {
+            display: inline-block;
+            color: #64748b;
+            font-size: 1.5em;
+            margin: 0 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .question-block, .section {
+                page-break-inside: avoid;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Resume Analyzer</h1>
+            <p>Complete Interview Preparation Guide</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Full-Stack MERN Application with AI-Powered Features</p>
+        </div>
+
+        <!-- PROJECT OVERVIEW -->
+        <div class="section">
+            <h2>📋 Project Overview</h2>
+            <p>
+                <strong>AI Resume Analyzer</strong> is a comprehensive full-stack web application designed to help job seekers 
+                optimize their resumes and prepare for interviews. The platform uses intelligent algorithms to analyze resumes 
+                against job descriptions, providing ATS (Applicant Tracking System) compatibility scores and actionable feedback.
+            </p>
+            
+            <h3>Key Features</h3>
+            <ul class="feature-list">
+                <li><strong>ATS Resume Analysis:</strong> Upload PDF resumes and analyze them against job descriptions to get compatibility scores (0-100%), keyword matching, and improvement suggestions.</li>
+                <li><strong>Mock Interview Practice:</strong> Role-specific interview questions with AI-powered feedback, supporting multiple job categories like Software Engineer, Data Scientist, and Product Manager.</li>
+                <li><strong>Dashboard & Analytics:</strong> Comprehensive dashboard showing resume statistics, average ATS scores, and interview performance tracking.</li>
+                <li><strong>User Authentication:</strong> Secure JWT-based authentication with user registration, login, and protected routes.</li>
+            </ul>
+        </div>
+
+        <!-- TECH STACK -->
+        <div class="section">
+            <h2>💻 Technology Stack</h2>
+            
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <h4>Frontend</h4>
+                    <ul>
+                        <li>React.js</li>
+                        <li>React Router</li>
+                        <li>Tailwind CSS</li>
+                        <li>Axios</li>
+                        <li>React Toastify</li>
+                        <li>Lucide React Icons</li>
+                    </ul>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>Backend</h4>
+                    <ul>
+                        <li>Node.js</li>
+                        <li>Express.js</li>
+                        <li>MongoDB</li>
+                        <li>Mongoose ODM</li>
+                        <li>JWT Authentication</li>
+                        <li>Bcrypt</li>
+                    </ul>
+                </div>
+                
+                <div class="tech-card">
+                    <h4>Additional Tools</h4>
+                    <ul>
+                        <li>Multer (File Upload)</li>
+                        <li>PDF-Parse</li>
+                        <li>CORS</li>
+                        <li>dotenv</li>
+                        <li>Nodemon</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARCHITECTURE -->
+        <div class="section">
+            <h2>🏗️ System Architecture</h2>
+            
+            <div class="architecture-flow">
+                <div class="flow-step">React Frontend</div>
+                <span class="arrow">→</span>
+                <div class="flow-step">Express API</div>
+                <span class="arrow">→</span>
+                <div class="flow-step">MongoDB</div>
+            </div>
+
+            <h3>Application Flow</h3>
+            <ol>
+                <li><strong>User Authentication:</strong> Users register/login → JWT token generated → Token stored in localStorage</li>
+                <li><strong>Resume Upload:</strong> User uploads PDF → Multer processes file → PDF-Parse extracts text → Stored in MongoDB</li>
+                <li><strong>ATS Analysis:</strong> User provides job description → Algorithm analyzes keywords, structure, content → Returns score and suggestions</li>
+                <li><strong>Mock Interview:</strong> User selects role → Questions generated → Answers submitted → Feedback provided based on STAR method</li>
+            </ol>
+
+            <h3>ATS Scoring Algorithm</h3>
+            <p>The ATS scorer evaluates resumes using a weighted scoring system:</p>
+            <ul>
+                <li><span class="highlight">40% - Keyword Matching:</span> Matches keywords from job description with resume content</li>
+                <li><span class="highlight">30% - Resume Structure:</span> Checks for essential sections (Experience, Education, Skills, etc.)</li>
+                <li><span class="highlight">30% - Content Quality:</span> Evaluates action verbs and quantifiable achievements</li>
+            </ul>
+        </div>
+
+        <!-- API ENDPOINTS -->
+        <div class="section">
+            <h2>🔌 API Endpoints</h2>
+            
+            <h3>Authentication Routes</h3>
+            <div style="margin: 10px 0;">
+                <div class="api-endpoint"><span class="method post">POST</span> /api/auth/register - Register new user</div><br>
+                <div class="api-endpoint"><span class="method post">POST</span> /api/auth/login - Login user</div><br>
+                <div class="api-endpoint"><span class="method get">GET</span> /api/auth/me - Get current user (protected)</div>
+            </div>
+
+            <h3>Resume Routes</h3>
+            <div style="margin: 10px 0;">
+                <div class="api-endpoint"><span class="method post">POST</span> /api/resumes/upload - Upload resume</div><br>
+                <div class="api-endpoint"><span class="method get">GET</span> /api/resumes - Get all user resumes</div><br>
+                <div class="api-endpoint"><span class="method get">GET</span> /api/resumes/:id - Get single resume</div><br>
+                <div class="api-endpoint"><span class="method put">PUT</span> /api/resumes/:id/analyze - Analyze resume</div><br>
+                <div class="api-endpoint"><span class="method delete">DELETE</span> /api/resumes/:id - Delete resume</div>
+            </div>
+
+            <h3>Interview Routes</h3>
+            <div style="margin: 10px 0;">
+                <div class="api-endpoint"><span class="method post">POST</span> /api/interviews - Create interview session</div><br>
+                <div class="api-endpoint"><span class="method get">GET</span> /api/interviews - Get all user interviews</div><br>
+                <div class="api-endpoint"><span class="method put">PUT</span> /api/interviews/:id/answer - Submit answer</div><br>
+                <div class="api-endpoint"><span class="method post">POST</span> /api/interviews/:id/complete - Complete interview</div><br>
+                <div class="api-endpoint"><span class="method delete">DELETE</span> /api/interviews/:id - Delete interview</div>
+            </div>
+        </div>
+
+        <!-- INTERVIEW QUESTIONS -->
+        <div class="section">
+            <h2>❓ Important Interview Questions & Answers</h2>
+
+            <div class="question-block">
+                <div class="question">Q1: Can you explain your AI Resume Analyzer project?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "AI Resume Analyzer is a full-stack MERN application I developed to help job seekers optimize their resumes 
+                    for ATS systems. The application allows users to upload their resumes in PDF format, analyze them against 
+                    specific job descriptions, and receive a compatibility score along with actionable feedback.
+                    <br><br>
+                    The platform also includes a mock interview feature where users can practice role-specific questions and 
+                    receive AI-powered feedback. I implemented secure JWT authentication, file upload handling with Multer, 
+                    and created a custom ATS scoring algorithm that evaluates resumes based on keyword matching (40%), 
+                    structure (30%), and content quality (30%)."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q2: What challenges did you face while building this project?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "One major challenge was implementing the PDF parsing functionality. I used the pdf-parse library to extract 
+                    text from uploaded PDFs, but handling different PDF formats and structures required careful error handling.
+                    <br><br>
+                    Another challenge was designing the ATS scoring algorithm. I researched how real ATS systems work and created 
+                    a weighted scoring system that analyzes keyword density, resume structure, and content quality. I also had to 
+                    handle edge cases like missing sections or poorly formatted resumes.
+                    <br><br>
+                    For file uploads, I implemented Multer middleware with proper validation to ensure only PDF files under 5MB 
+                    are accepted, and I set up proper CORS configuration to handle cross-origin requests between the frontend 
+                    and backend."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q3: How did you implement authentication in your application?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I implemented JWT (JSON Web Token) based authentication for secure user sessions. Here's the flow:
+                    <ul>
+                        <li><strong>Registration:</strong> User credentials are validated, passwords are hashed using bcrypt with a salt round of 10, and stored in MongoDB</li>
+                        <li><strong>Login:</strong> User credentials are verified, and a JWT token is generated with a 7-day expiration</li>
+                        <li><strong>Protected Routes:</strong> I created an authentication middleware that verifies the JWT token from request headers</li>
+                        <li><strong>Frontend:</strong> The token is stored in localStorage and automatically attached to API requests using Axios interceptors</li>
+                    </ul>
+                    This ensures that only authenticated users can access features like resume upload, analysis, and mock interviews."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q4: Explain the database schema for your application.</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I designed three main Mongoose schemas:
+                    <br><br>
+                    <strong>1. User Schema:</strong>
+                    <ul>
+                        <li>name, email (unique), password (hashed)</li>
+                        <li>Includes methods for password comparison and JWT token generation</li>
+                    </ul>
+                    <strong>2. Resume Schema:</strong>
+                    <ul>
+                        <li>userId (reference to User), originalName, filename, filePath</li>
+                        <li>extractedText (from PDF parsing)</li>
+                        <li>analysis object containing atsScore, keywordMatches, suggestions, and missingKeywords</li>
+                        <li>Timestamps for tracking creation and updates</li>
+                    </ul>
+                    <strong>3. Interview Schema:</strong>
+                    <ul>
+                        <li>userId (reference to User), jobRole, status (in-progress/completed)</li>
+                        <li>questions array with question text, user answers, and feedback</li>
+                        <li>overallScore and completedAt timestamp</li>
+                    </ul>
+                    All schemas include proper indexing and validation for data integrity."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q5: How does your ATS scoring algorithm work?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "The ATS scoring algorithm uses a weighted approach with three main components:
+                    <br><br>
+                    <strong>1. Keyword Matching (40% weight):</strong>
+                    <ul>
+                        <li>Extract keywords from the job description</li>
+                        <li>Compare with resume content (case-insensitive)</li>
+                        <li>Calculate match percentage and identify missing keywords</li>
+                    </ul>
+                    <strong>2. Structure Analysis (30% weight):</strong>
+                    <ul>
+                        <li>Check for essential sections: Experience, Education, Skills, Summary</li>
+                        <li>Verify proper formatting and organization</li>
+                    </ul>
+                    <strong>3. Content Quality (30% weight):</strong>
+                    <ul>
+                        <li>Identify action verbs (achieved, developed, implemented, etc.)</li>
+                        <li>Look for quantifiable achievements (numbers, percentages, metrics)</li>
+                        <li>Evaluate overall content depth</li>
+                    </ul>
+                    The final score is calculated as a weighted average and presented on a 0-100 scale with specific suggestions for improvement."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q6: How did you handle file uploads securely?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I implemented several security measures for file uploads:
+                    <ul>
+                        <li><strong>File Type Validation:</strong> Only PDF files are accepted using Multer's fileFilter</li>
+                        <li><strong>File Size Limit:</strong> Maximum 5MB per file to prevent server overload</li>
+                        <li><strong>Unique Filenames:</strong> Generated using timestamps and random strings to prevent conflicts</li>
+                        <li><strong>Secure Storage:</strong> Files are stored outside the public directory with controlled access</li>
+                        <li><strong>User Association:</strong> Each uploaded file is linked to the authenticated user's ID</li>
+                        <li><strong>Error Handling:</strong> Comprehensive try-catch blocks with proper error messages</li>
+                    </ul>
+                    I also implemented cleanup functionality to delete files from the server when users delete resumes from the database."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q7: What is the difference between authentication and authorization?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "<strong>Authentication</strong> is the process of verifying who a user is (login with credentials), 
+                    while <strong>Authorization</strong> is determining what resources a user can access.
+                    <br><br>
+                    In my project:
+                    <ul>
+                        <li><strong>Authentication:</strong> Users log in with email/password, and I verify their identity using JWT tokens</li>
+                        <li><strong>Authorization:</strong> The auth middleware checks if the user has a valid token before allowing access to protected routes. Additionally, users can only view, edit, or delete their own resumes and interviews, not others'</li>
+                    </ul>
+                    I implemented authorization by checking the userId in the database against the authenticated user's ID from the JWT token."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q8: How did you manage state in your React application?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I used a combination of React hooks and Context API for state management:
+                    <ul>
+                        <li><strong>useState:</strong> For component-level state like form inputs, loading states, and local data</li>
+                        <li><strong>useEffect:</strong> For side effects like fetching data on component mount and cleanup</li>
+                        <li><strong>Context API:</strong> Created an AuthContext to manage global authentication state (user info, login/logout functions) accessible across all components</li>
+                        <li><strong>Custom Hooks:</strong> Created useAuth hook to easily access authentication context</li>
+                    </ul>
+                    For API calls, I created a service layer (resumeService, interviewService, authService) to separate business logic from components, making the code more maintainable and testable."
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q9: How would you scale this application for production?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "To scale this application for production, I would implement:
+                    <ul>
+                        <li><strong>Cloud Storage:</strong> Move file uploads to AWS S3 or similar cloud storage instead of local server storage</li>
+                        <li><strong>CDN:</strong> Use a Content Delivery Network for static assets to reduce server load</li>
+                        <li><strong>Database Optimization:</strong> Implement database indexing, connection pooling, and consider MongoDB Atlas for managed hosting</li>
+                        <li><strong>Caching:</strong> Use Redis for caching frequently accessed data like user sessions and resume analyses</li>
+                        <li><strong>Load Balancing:</strong> Deploy multiple server instances behind a load balancer</li>
+                        <li><strong>API Rate Limiting:</strong> Implement rate limiting to prevent abuse</li>
+                        <li><strong>Monitoring:</strong> Add logging (Winston) and monitoring tools (PM2, New Relic)</li>
+                        <li><strong>AI Integration:</strong> Integrate OpenAI or Google Gemini API for more advanced resume analysis and interview feedback</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q10: What security measures did you implement?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I implemented multiple security layers:
+                    <ul>
+                        <li><strong>Password Security:</strong> Bcrypt hashing with salt rounds for password storage</li>
+                        <li><strong>JWT Security:</strong> Secure token generation with expiration, stored in httpOnly cookies (or localStorage with XSS protection)</li>
+                        <li><strong>Input Validation:</strong> Server-side validation for all user inputs to prevent injection attacks</li>
+                        <li><strong>CORS Configuration:</strong> Properly configured CORS to allow only trusted origins</li>
+                        <li><strong>File Upload Security:</strong> File type and size validation, sanitized filenames</li>
+                        <li><strong>Environment Variables:</strong> Sensitive data like JWT secrets and database URIs stored in .env files</li>
+                        <li><strong>Error Handling:</strong> Generic error messages to avoid exposing system details</li>
+                        <li><strong>Protected Routes:</strong> Authentication middleware on all sensitive endpoints</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q11: Explain the mock interview feature implementation.</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "The mock interview feature works as follows:
+                    <ul>
+                        <li><strong>Question Bank:</strong> I created a comprehensive question bank with role-specific questions for different job categories (Software Engineer, Data Scientist, Product Manager, etc.)</li>
+                        <li><strong>Session Creation:</strong> When a user starts an interview, a new interview document is created in MongoDB with status 'in-progress'</li>
+                        <li><strong>Answer Submission:</strong> Users submit answers for each question, which are stored in the questions array</li>
+                        <li><strong>Feedback Algorithm:</strong> The system analyzes answers based on:
+                            <ul>
+                                <li>Answer length and detail (minimum word count)</li>
+                                <li>Use of STAR method (Situation, Task, Action, Result)</li>
+                                <li>Presence of action verbs and quantifiable metrics</li>
+                                <li>Specific examples and technical depth</li>
+                            </ul>
+                        </li>
+                        <li><strong>Scoring:</strong> Each answer receives a score (0-100), and an overall interview score is calculated</li>
+                        <li><strong>History Tracking:</strong> Completed interviews are saved for users to review their progress</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q12: How did you handle errors and edge cases?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "I implemented comprehensive error handling:
+                    <ul>
+                        <li><strong>Try-Catch Blocks:</strong> Wrapped all async operations in try-catch blocks</li>
+                        <li><strong>Custom Error Middleware:</strong> Created centralized error handling middleware in Express</li>
+                        <li><strong>Validation:</strong> Input validation on both frontend and backend</li>
+                        <li><strong>User Feedback:</strong> Used React Toastify to display user-friendly error messages</li>
+                        <li><strong>Edge Cases Handled:</strong>
+                            <ul>
+                                <li>Empty or corrupted PDF files</li>
+                                <li>Missing job descriptions</li>
+                                <li>Network failures during file upload</li>
+                                <li>Expired JWT tokens (automatic logout)</li>
+                                <li>Duplicate email registration</li>
+                                <li>File size exceeding limits</li>
+                            </ul>
+                        </li>
+                        <li><strong>Loading States:</strong> Implemented loading indicators for better UX during async operations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q13: What would you add to improve this project?</div>
+                <div class="answer">
+                    <strong>Answer:</strong><br>
+                    "Future enhancements I would implement:
+                    <ul>
+                        <li><strong>AI Integration:</strong> Use OpenAI GPT or Google Gemini for more intelligent resume analysis and personalized suggestions</li>
+                        <li><strong>Resume Builder:</strong> Add a drag-and-drop resume builder with ATS-friendly templates</li>
+                        <li><strong>Cover Letter Generator:</strong> AI-powered cover letter creation based on job descriptions</li>
+                        <li><strong>Job Matching:</strong> Recommend jobs based on resume content and skills</li>
+                        <li><strong>LinkedIn Integration:</strong> Import profile data and optimize LinkedIn profiles</li>
+                        <li><strong>Email Notifications:</strong> Send analysis results and interview reminders via email</li>
+                        <li><strong>PDF Export:</strong> Generate downloadable PDF reports of analysis results</li>
+                        <li><strong>Multi-language Support:</strong> Support for resumes in different languages</li>
+                        <li><strong>Video Interviews:</strong> Practice video interviews with AI feedback on body language and speech</li>
+                        <li><strong>Analytics Dashboard:</strong> More detailed analytics with charts and progress tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TECHNICAL CONCEPTS -->
+        <div class="section">
+            <h2>🎓 Key Technical Concepts to Explain</h2>
+
+            <h3>1. RESTful API Design</h3>
+            <p>Explain how you followed REST principles with proper HTTP methods (GET, POST, PUT, DELETE), 
+            resource-based URLs, and stateless communication.</p>
+
+            <h3>2. Middleware in Express</h3>
+            <p>Describe how middleware functions work in the request-response cycle, including authentication 
+            middleware, error handling middleware, and Multer for file uploads.</p>
+
+            <h3>3. JWT Authentication Flow</h3>
+            <p>Explain the complete flow: user login → server generates JWT → client stores token → 
+            client sends token in headers → server verifies token → access granted/denied.</p>
+
+            <h3>4. React Component Lifecycle</h3>
+            <p>Discuss how you used useEffect for component mounting, data fetching, and cleanup operations.</p>
+
+            <h3>5. Asynchronous JavaScript</h3>
+            <p>Explain your use of async/await for handling promises, error handling with try-catch, 
+            and parallel requests with Promise.all().</p>
+
+            <h3>6. MongoDB vs SQL</h3>
+            <p>Be ready to explain why you chose MongoDB (flexible schema, JSON-like documents, 
+            easy integration with Node.js) and when SQL might be better.</p>
+        </div>
+
+        <!-- TIPS -->
+        <div class="section">
+            <h2>💡 Interview Tips</h2>
+            
+            <div class="tip-box">
+                <strong>🎯 STAR Method for Behavioral Questions:</strong>
+                When discussing your project, use the STAR method:
+                <ul>
+                    <li><strong>Situation:</strong> "Job seekers struggle with ATS systems..."</li>
+                    <li><strong>Task:</strong> "I needed to create a tool to analyze resumes..."</li>
+                    <li><strong>Action:</strong> "I built a MERN stack application with..."</li>
+                    <li><strong>Result:</strong> "Users can now get instant feedback and improve their ATS scores..."</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <strong>📊 Quantify Your Achievements:</strong>
+                <ul>
+                    <li>"Implemented authentication for 100+ concurrent users"</li>
+                    <li>"Reduced resume analysis time to under 2 seconds"</li>
+                    <li>"Handled file uploads up to 5MB with 99% success rate"</li>
+                    <li>"Created 50+ role-specific interview questions"</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <strong>🔍 Be Honest About Limitations:</strong>
+                <ul>
+                    <li>Acknowledge that the current ATS algorithm is rule-based, not ML-based</li>
+                    <li>Mention that you'd integrate real AI APIs for production</li>
+                    <li>Discuss scalability improvements you would make</li>
+                    <li>Show willingness to learn and improve</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <strong>🚀 Demonstrate Problem-Solving:</strong>
+                <ul>
+                    <li>Explain how you debugged PDF parsing issues</li>
+                    <li>Describe how you optimized database queries</li>
+                    <li>Discuss how you handled CORS errors</li>
+                    <li>Share how you improved user experience with loading states</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- COMMON TECHNICAL QUESTIONS -->
+        <div class="section">
+            <h2>⚡ Quick Technical Questions</h2>
+            
+            <div class="question-block">
+                <div class="question">Q: What is CORS and why did you need it?</div>
+                <div class="answer">
+                    CORS (Cross-Origin Resource Sharing) allows the frontend (localhost:5173) to make requests to 
+                    the backend (localhost:5000). I configured CORS middleware in Express to accept requests from 
+                    the client URL.
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q: What is Mongoose and why use it?</div>
+                <div class="answer">
+                    Mongoose is an ODM (Object Data Modeling) library for MongoDB. It provides schema validation, 
+                    type casting, query building, and business logic hooks, making it easier to work with MongoDB 
+                    in Node.js applications.
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q: Explain the difference between localStorage and sessionStorage.</div>
+                <div class="answer">
+                    localStorage persists data even after browser closure, while sessionStorage clears when the 
+                    tab/window is closed. I used localStorage for JWT tokens to maintain user sessions across 
+                    browser sessions.
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q: What is the virtual DOM in React?</div>
+                <div class="answer">
+                    The virtual DOM is a lightweight copy of the actual DOM. React uses it to efficiently update 
+                    only the changed parts of the UI by comparing the virtual DOM with the previous version 
+                    (diffing) and applying minimal updates to the real DOM.
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q: What are React hooks you used?</div>
+                <div class="answer">
+                    I used useState for state management, useEffect for side effects and data fetching, useNavigate 
+                    for programmatic navigation, useContext for accessing global auth state, and created custom 
+                    hooks like useAuth.
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="question">Q: How does bcrypt work?</div>
+                <div class="answer">
+                    Bcrypt is a password hashing function that uses a salt (random data) and multiple rounds of 
+                    hashing to create a secure hash. It's intentionally slow to prevent brute-force attacks. 
+                    I used bcrypt.hash() to hash passwords and bcrypt.compare() to verify them during login.
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJECT HIGHLIGHTS -->
+        <div class="section">
+            <h2>🌟 Project Highlights to Mention</h2>
+            <ul class="feature-list">
+                <li><strong>Full-Stack Development:</strong> Built both frontend and backend from scratch</li>
+                <li><strong>Secure Authentication:</strong> Implemented industry-standard JWT authentication</li>
+                <li><strong>File Processing:</strong> Handled PDF uploads and text extraction</li>
+                <li><strong>Algorithm Design:</strong> Created custom ATS scoring and interview feedback algorithms</li>
+                <li><strong>Responsive Design:</strong> Used Tailwind CSS for mobile-friendly UI</li>
+                <li><strong>Error Handling:</strong> Comprehensive error handling on both client and server</li>
+                <li><strong>Code Organization:</strong> Followed MVC pattern with separate routes, models, and controllers</li>
+                <li><strong>API Design:</strong> RESTful API with proper HTTP methods and status codes</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p><strong>Good luck with your interview! 🎉</strong></p>
+            <p style="margin-top: 10px;">Remember: Confidence + Preparation = Success</p>
+            <p style="margin-top: 5px; font-size: 0.9em;">Practice explaining your project out loud before the interview</p>
+        </div>
+    </div>
+
+    <script>
+        // Print functionality
+        window.onload = function() {
+            console.log('AI Resume Analyzer Interview Guide loaded successfully!');
+        }
+    </script>
+</body>
+</html>
