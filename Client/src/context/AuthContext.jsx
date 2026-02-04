@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        isAuthenticated: isAuthenticated(),
+        isAuthenticated: !!user || !!localStorage.getItem('token'),
         loading
     };
 
