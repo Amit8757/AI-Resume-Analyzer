@@ -54,28 +54,8 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({
         success: true,
         message: 'AI Resume Analyzer API is running',
+        environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString()
-    });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || 'Internal server error'
-    });
-});
-
-// 404 handler
-app.use((req, res, next) => {
-    if (process.env.NODE_ENV === 'production' && !req.path.startsWith('/api')) {
-        return next();
-    }
-    res.status(404).json({
-        success: false,
-        message: 'Route not found'
     });
 });
 
@@ -83,10 +63,31 @@ app.use((req, res, next) => {
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../Client/dist')));
 
-    app.get('*', (req, res) => {
+    // Catch-all route to serve the SPA
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
         res.sendFile(path.resolve(__dirname, '../Client', 'dist', 'index.html'));
     });
 }
+
+// 404 handler for API or missing production files
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.method} ${req.path} not found`
+    });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server Error:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal server error'
+    });
+});
 
 // Connect to MongoDB
 const connectDB = async () => {
