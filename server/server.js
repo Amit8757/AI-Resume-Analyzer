@@ -59,6 +59,33 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// DEBUG ROUTE - Remove before final
+app.get('/api/debug-paths', async (req, res) => {
+    try {
+        const fs = await import('fs');
+        const rootPath = path.resolve(__dirname, '..');
+        const clientPath = path.resolve(rootPath, 'Client');
+        const distPath = path.resolve(clientPath, 'dist');
+
+        const info = {
+            __dirname,
+            rootPath,
+            clientPath,
+            distPath,
+            rootExists: fs.default.existsSync(rootPath),
+            clientExists: fs.default.existsSync(clientPath),
+            distExists: fs.default.existsSync(distPath),
+            rootContents: fs.default.readdirSync(rootPath),
+            clientContents: fs.default.existsSync(clientPath) ? fs.default.readdirSync(clientPath) : [],
+            distContents: fs.default.existsSync(distPath) ? fs.default.readdirSync(distPath) : []
+        };
+
+        res.json(info);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
     const frontendPath = path.join(__dirname, '../Client/dist');
