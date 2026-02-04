@@ -115,5 +115,6 @@ export const updatePassword = async (currentPassword, newPassword) => {
  */
 export const oauthLogin = (provider) => {
     // Redirect to backend OAuth endpoint
-    window.location.href = `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/oauth/${provider}`;
+    const baseUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
+    window.location.href = `${baseUrl}/api/oauth/${provider}`;
 };

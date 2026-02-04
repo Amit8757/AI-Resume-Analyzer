@@ -104,7 +104,10 @@ const Login = () => {
           {/* OAuth Buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/oauth/google`}
+              onClick={() => {
+                const baseUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
+                window.location.href = `${baseUrl}/api/oauth/google`;
+              }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -117,7 +120,10 @@ const Login = () => {
             </button>
 
             <button
-              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/oauth/github`}
+              onClick={() => {
+                const baseUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
+                window.location.href = `${baseUrl}/api/oauth/github`;
+              }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

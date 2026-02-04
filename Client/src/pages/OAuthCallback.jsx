@@ -32,7 +32,8 @@ const OAuthCallback = () => {
                 localStorage.setItem('token', token);
 
                 // Fetch user data
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
+                const apiBase = import.meta.env.PROD ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+                const response = await fetch(`${apiBase}/auth/me`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
