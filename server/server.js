@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === 'production') {
     const indexHtml = path.resolve(frontendPath, 'index.html');
 
     console.log('Production mode detected');
-    console.log('Static files directory:', frontendPath);
+    console.log('Expected static files directory:', frontendPath);
 
     // Serve static files
     app.use(express.static(frontendPath));
