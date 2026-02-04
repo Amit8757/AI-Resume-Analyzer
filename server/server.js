@@ -62,8 +62,12 @@ app.get('/api/health', (req, res) => {
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
     const frontendPath = path.join(__dirname, '../Client/dist');
-    console.log('Serving frontend from:', frontendPath);
+    const indexHtml = path.resolve(frontendPath, 'index.html');
 
+    console.log('Production mode detected');
+    console.log('Static files directory:', frontendPath);
+
+    // Serve static files
     app.use(express.static(frontendPath));
 
     // Catch-all route to serve the SPA
@@ -71,7 +75,17 @@ if (process.env.NODE_ENV === 'production') {
         if (req.path.startsWith('/api')) {
             return next();
         }
-        res.sendFile(path.resolve(__dirname, '../Client', 'dist', 'index.html'));
+
+        res.sendFile(indexHtml, (err) => {
+            if (err) {
+                console.error('Error sending index.html:', err.message);
+                res.status(404).json({
+                    success: false,
+                    message: "Frontend build not found. Please check deployment logs.",
+                    path: indexHtml
+                });
+            }
+        });
     });
 }
 
