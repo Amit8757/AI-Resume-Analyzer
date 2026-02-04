@@ -61,7 +61,10 @@ app.get('/api/health', (req, res) => {
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../Client/dist')));
+    const frontendPath = path.join(__dirname, '../Client/dist');
+    console.log('Serving frontend from:', frontendPath);
+
+    app.use(express.static(frontendPath));
 
     // Catch-all route to serve the SPA
     app.get('*', (req, res, next) => {
