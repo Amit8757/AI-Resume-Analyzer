@@ -88,7 +88,7 @@ app.get('/api/debug-paths', async (req, res) => {
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../Client/dist');
+    const frontendPath = path.join(__dirname, '../Client/build');
     const indexHtml = path.resolve(frontendPath, 'index.html');
 
     console.log('Production mode detected');
