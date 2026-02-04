@@ -5,7 +5,7 @@
     "main": "server/server.js",
     "type": "module",
     "scripts": {
-        "build": "cd Client && npm install && npm run build",
+        "build": "npm install && npm install --prefix Client && npm run build --prefix Client && (test -d Client/dist || (echo 'ERROR: Client/dist not found after build' && exit 1))",
         "start": "node server/server.js"
     },
     "dependencies": {
