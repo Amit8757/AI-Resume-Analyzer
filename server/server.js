@@ -65,19 +65,19 @@ app.get('/api/debug-paths', async (req, res) => {
         const fs = await import('fs');
         const rootPath = path.resolve(__dirname, '..');
         const clientPath = path.resolve(rootPath, 'Client');
-        const distPath = path.resolve(clientPath, 'dist');
+        const buildPath = path.resolve(clientPath, 'build');
 
         const info = {
             __dirname,
             rootPath,
             clientPath,
-            distPath,
+            buildPath,
             rootExists: fs.default.existsSync(rootPath),
             clientExists: fs.default.existsSync(clientPath),
-            distExists: fs.default.existsSync(distPath),
+            buildExists: fs.default.existsSync(buildPath),
             rootContents: fs.default.readdirSync(rootPath),
             clientContents: fs.default.existsSync(clientPath) ? fs.default.readdirSync(clientPath) : [],
-            distContents: fs.default.existsSync(distPath) ? fs.default.readdirSync(distPath) : []
+            buildContents: fs.default.existsSync(buildPath) ? fs.default.readdirSync(buildPath) : []
         };
 
         res.json(info);
