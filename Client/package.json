@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "ai-resume-analyzer": "file:..",
     "axios": "^1.6.5",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",

@@ -1,0 +1,16 @@
+{
+    "name": "ai-resume-analyzer",
+    "version": "1.0.0",
+    "description": "AI Resume Analyzer Deployment Wrapper",
+    "main": "server/server.js",
+    "type": "module",
+    "scripts": {
+        "install-server": "npm install --prefix server",
+        "install-client": "npm install --prefix Client",
+        "build-client": "npm run build --prefix Client",
+        "build": "npm run install-server && npm run install-client && npm run build-client",
+        "start": "node server/server.js"
+    },
+    "author": "",
+    "license": "ISC"
+}

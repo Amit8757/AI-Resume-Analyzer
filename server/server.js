@@ -4,10 +4,15 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from './config/passport.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import resumeRoutes from './routes/resume.js';
 import interviewRoutes from './routes/interview.js';
 import oauthRoutes from './routes/oauth.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -64,12 +69,24 @@ app.use((err, req, res, next) => {
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production' && !req.path.startsWith('/api')) {
+        return next();
+    }
     res.status(404).json({
         success: false,
         message: 'Route not found'
     });
 });
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../Client/dist')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../Client', 'dist', 'index.html'));
+    });
+}
 
 // Connect to MongoDB
 const connectDB = async () => {
