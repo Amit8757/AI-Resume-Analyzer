@@ -77,7 +77,7 @@ app.get('/api/health', (req, res) => {
 
 // Serve frontend in production (ONLY if it exists locally)
 if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../Client/build');
+    const frontendPath = path.join(__dirname, '../Client/dist');
     const indexHtml = path.resolve(frontendPath, 'index.html');
 
     const fs = await import('fs');
