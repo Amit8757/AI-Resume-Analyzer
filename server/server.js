@@ -33,7 +33,8 @@ const app = express();
 // CORS CONFIG (VERY IMPORTANT)
 // --------------------
 const allowedOrigins = [
-    process.env.CLIENT_URL,          // Render frontend URL
+    process.env.CLIENT_URL,
+    "https://ai-resume-analyzer-1-vz59.onrender.com", // Explicitly trust the Render frontend
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:5174"
@@ -44,18 +45,26 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: function (origin, callback) {
+            // allow requests with no origin (like mobile apps or curl requests)
             if (!origin) return callback(null, true);
 
             const normalizedOrigin = origin.replace(/\/$/, "");
-            if (allowedOrigins.includes(normalizedOrigin)) {
+
+            // Check if origin is in allowed list OR is an onrender.com subdomain
+            const isAllowed = allowedOrigins.includes(normalizedOrigin) ||
+                normalizedOrigin.endsWith(".onrender.com");
+
+            if (isAllowed) {
                 callback(null, true);
             } else {
-                console.warn("[CORS BLOCKED]:", origin);
-                callback(new Error("Not allowed by CORS"));
+                console.warn("[CORS REJECTED]:", origin);
+                // CRITICAL: Return (null, false) instead of Error to avoid 500 crash
+                callback(null, false);
             }
         },
         credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"]
     })
 );
 
