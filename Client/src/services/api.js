@@ -1,8 +1,15 @@
 import axios from 'axios';
 
 // Create axios instance with base URL
+const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+
+if (import.meta.env.PROD) {
+    console.log('API Service initialized in Production mode');
+    console.log('Base URL:', baseURL);
+}
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api'),
+    baseURL,
     headers: {
         'Content-Type': 'application/json'
     }
