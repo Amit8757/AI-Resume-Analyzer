@@ -15,6 +15,36 @@ const Register = () => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [emailStatus, setEmailStatus] = useState({ available: null, loading: false, message: '' });
+
+  // Debounced email check
+  useEffect(() => {
+    const checkEmail = async () => {
+      if (!formData.email || !formData.email.includes('@')) {
+        setEmailStatus({ available: null, loading: false, message: '' });
+        return;
+      }
+
+      setEmailStatus(prev => ({ ...prev, loading: true }));
+      try {
+        const { checkEmailAvailability } = await import('../services/authService');
+        const data = await checkEmailAvailability(formData.email);
+        setEmailStatus({
+          available: data.available,
+          loading: false,
+          message: data.message
+        });
+      } catch (error) {
+        setEmailStatus({ available: null, loading: false, message: '' });
+      }
+    };
+
+    const timer = setTimeout(() => {
+      checkEmail();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.email]);
 
   const handleChange = (e) => {
     setFormData({
@@ -96,6 +126,14 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+              {emailStatus.loading && (
+                <p className="text-xs text-slate-500 mt-1 italic">Checking availability...</p>
+              )}
+              {!emailStatus.loading && emailStatus.message && (
+                <p className={`text-xs mt-1 ${emailStatus.available ? 'text-green-600' : 'text-red-600'}`}>
+                  {emailStatus.message}
+                </p>
+              )}
             </div>
 
             <div>

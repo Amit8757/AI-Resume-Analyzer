@@ -18,6 +18,26 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
+
+// @route   GET /api/auth/check-email
+// @desc    Check if email exists
+// @access  Public
+router.get('/check-email', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email required' });
+        }
+        const user = await User.findOne({ email });
+        res.status(200).json({
+            success: true,
+            available: !user,
+            message: user ? 'Email already taken' : 'Email available'
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;

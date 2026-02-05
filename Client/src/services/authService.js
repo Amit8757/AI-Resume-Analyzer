@@ -13,6 +13,14 @@ export const register = async (userData) => {
 };
 
 /**
+ * Check if email is available
+ */
+export const checkEmailAvailability = async (email) => {
+    const response = await api.get(`/auth/check-email?email=${email}`);
+    return response.data;
+};
+
+/**
  * Login user
  */
 export const login = async (credentials) => {
