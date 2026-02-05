@@ -22,18 +22,18 @@ const KeyFeatures = () => {
   ];
 
   return (
-    <section id="features" className="py-24 bg-white max-w-7xl mx-auto px-6 md:px-12">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Key Features</h2>
-        <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+    <section id="features" className="py-16 md:py-24 bg-white max-w-7xl mx-auto px-6 md:px-12">
+      <div className="text-center mb-12 md:mb-16">
+        <h2 className="text-2xl md:text-4xl font-bold text-slate-900 mb-4">Key Features</h2>
+        <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto">
           Everything you need to optimize your application and ace the interview.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-16 items-center">
+      <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
 
-        {/* Left Mock Image */}
-        <div className="relative group">
+        {/* Left Mock Image - Hidden or simplified on mobile */}
+        <div className="relative group hidden lg:block">
           <div className="absolute -inset-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-2xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-500 opacity-50"></div>
           <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-100 relative z-10">
             {/* Mock Dashboard UI for ATS Score */}

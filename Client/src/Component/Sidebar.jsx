@@ -9,6 +9,7 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   const menuItems = [
+    { icon: LayoutDashboard, label: "Home", path: "/" },
     { icon: LayoutDashboard, label: "Dashboard", path: "/app" },
     { icon: History, label: "History", path: "/app/history" },
     { icon: MessageSquare, label: "Mock Interview", path: "/app/interview" },
@@ -23,12 +24,12 @@ const Sidebar = () => {
     <div className="h-screen w-20 md:w-64 bg-[#1E293B] text-white flex flex-col py-6 sticky top-0 overflow-y-auto transition-all duration-300">
 
       {/* Sidebar Header */}
-      <div className="flex items-center gap-3 px-6 mb-10">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xl">
+      <Link to="/" className="flex items-center gap-3 px-6 mb-10 group">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xl group-hover:scale-110 transition-transform">
           📄
         </div>
         <span className="font-bold text-lg hidden md:block">AI Analyzer</span>
-      </div>
+      </Link>
 
       {/* Menu Items */}
       <div className="flex flex-col gap-2 px-3">
