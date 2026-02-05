@@ -21,8 +21,23 @@ dotenv.config();
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'http://localhost:3000'
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true
 }));
 app.use(express.json());
@@ -35,6 +50,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
@@ -59,61 +75,25 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// DEBUG ROUTE - Remove before final
-app.get('/api/debug-paths', async (req, res) => {
-    try {
-        const fs = await import('fs');
-        const rootPath = path.resolve(__dirname, '..');
-        const clientPath = path.resolve(rootPath, 'Client');
-        const buildPath = path.resolve(clientPath, 'build');
-
-        const info = {
-            __dirname,
-            rootPath,
-            clientPath,
-            buildPath,
-            rootExists: fs.default.existsSync(rootPath),
-            clientExists: fs.default.existsSync(clientPath),
-            buildExists: fs.default.existsSync(buildPath),
-            rootContents: fs.default.readdirSync(rootPath),
-            clientContents: fs.default.existsSync(clientPath) ? fs.default.readdirSync(clientPath) : [],
-            buildContents: fs.default.existsSync(buildPath) ? fs.default.readdirSync(buildPath) : []
-        };
-
-        res.json(info);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Serve frontend in production
+// Serve frontend in production (ONLY if it exists locally)
 if (process.env.NODE_ENV === 'production') {
     const frontendPath = path.join(__dirname, '../Client/build');
     const indexHtml = path.resolve(frontendPath, 'index.html');
 
-    console.log('Production mode detected');
-    console.log('Expected static files directory:', frontendPath);
+    const fs = await import('fs');
+    if (fs.default.existsSync(frontendPath)) {
+        console.log('Production mode: Serving static files from', frontendPath);
+        app.use(express.static(frontendPath));
 
-    // Serve static files
-    app.use(express.static(frontendPath));
-
-    // Catch-all route to serve the SPA
-    app.get('*', (req, res, next) => {
-        if (req.path.startsWith('/api')) {
-            return next();
-        }
-
-        res.sendFile(indexHtml, (err) => {
-            if (err) {
-                console.error('Error sending index.html:', err.message);
-                res.status(404).json({
-                    success: false,
-                    message: "Frontend build not found. Please check deployment logs.",
-                    path: indexHtml
-                });
+        app.get('*', (req, res, next) => {
+            if (req.path.startsWith('/api')) {
+                return next();
             }
+            res.sendFile(indexHtml);
         });
-    });
+    } else {
+        console.log('Production mode: Frontend build not found locally, assuming separate deployment.');
+    }
 }
 
 // 404 handler for API or missing production files
