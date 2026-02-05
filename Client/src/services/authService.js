@@ -4,7 +4,7 @@ import api from './api';
  * Register a new user
  */
 export const register = async (userData) => {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('/api/auth/register', userData);
     if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -115,6 +115,11 @@ export const updatePassword = async (currentPassword, newPassword) => {
  */
 export const oauthLogin = (provider) => {
     // Redirect to backend OAuth endpoint
-    const baseUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000');
+    // Logic: Use VITE_API_URL's root if available, otherwise relative or localhost
+    let baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+
+    // Normalize if it ends with slash
+    baseUrl = baseUrl.replace(/\/$/, "");
+
     window.location.href = `${baseUrl}/api/oauth/${provider}`;
 };

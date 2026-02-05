@@ -1,105 +1,142 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import session from 'express-session';
-import passport from './config/passport.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import authRoutes from './routes/auth.js';
-import resumeRoutes from './routes/resume.js';
-import interviewRoutes from './routes/interview.js';
-import oauthRoutes from './routes/oauth.js';
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import session from "express-session";
+import passport from "./config/passport.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+// Routes
+import authRoutes from "./routes/auth.js";
+import resumeRoutes from "./routes/resume.js";
+import interviewRoutes from "./routes/interview.js";
+import oauthRoutes from "./routes/oauth.js";
+
+// --------------------
+// Setup dirname (ESM)
+// --------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
+// --------------------
+// Load env variables
+// --------------------
 dotenv.config();
 
-// Initialize express app
+// --------------------
+// Initialize app
+// --------------------
 const app = express();
 
-// Middleware
+// --------------------
+// CORS CONFIG (VERY IMPORTANT)
+// --------------------
 const allowedOrigins = [
-    process.env.CLIENT_URL,
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:5174'
-].filter(Boolean).map(url => url.replace(/\/$/, "")); // Remove trailing slashes
+    process.env.CLIENT_URL,          // Render frontend URL
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:5174"
+]
+    .filter(Boolean)
+    .map(url => url.replace(/\/$/, ""));
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true);
 
-        const normalizedOrigin = origin.replace(/\/$/, "");
-        if (allowedOrigins.includes(normalizedOrigin)) {
-            return callback(null, true);
-        } else {
-            const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-            return callback(new Error(msg), false);
-        }
-    },
-    credentials: true
-}));
+            const normalizedOrigin = origin.replace(/\/$/, "");
+            if (allowedOrigins.includes(normalizedOrigin)) {
+                callback(null, true);
+            } else {
+                console.warn("[CORS BLOCKED]:", origin);
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    })
+);
+
+// ✅ Handle preflight requests
+app.options("*", cors());
+
+// --------------------
+// Body parsers
+// --------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session middleware (required for Passport)
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-session-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-}));
+// --------------------
+// Session config
+// --------------------
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "fallback-secret",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        }
+    })
+);
 
-// Initialize Passport
+// --------------------
+// Passport init
+// --------------------
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/oauth', oauthRoutes);
-app.use('/api/resumes', resumeRoutes);
-app.use('/api/interviews', interviewRoutes);
+// --------------------
+// API Routes
+// --------------------
+app.use("/api/auth", authRoutes);
+app.use("/api/oauth", oauthRoutes);
+app.use("/api/resumes", resumeRoutes);
+app.use("/api/interviews", interviewRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
+// --------------------
+// Health check
+// --------------------
+app.get("/api/health", (req, res) => {
     res.status(200).json({
         success: true,
-        message: 'AI Resume Analyzer API is running',
+        message: "AI Resume Analyzer API is running",
         environment: process.env.NODE_ENV,
-        timestamp: new Date().toISOString()
+        time: new Date().toISOString()
     });
 });
 
-// Serve frontend in production (ONLY if it exists locally)
-if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../Client/dist');
-    const indexHtml = path.resolve(frontendPath, 'index.html');
+// --------------------
+// Serve frontend ONLY if built locally
+// --------------------
+if (process.env.NODE_ENV === "production") {
+    const frontendPath = path.join(__dirname, "../Client/dist");
 
-    const fs = await import('fs');
-    if (fs.default.existsSync(frontendPath)) {
-        console.log('Production mode: Serving static files from', frontendPath);
-        app.use(express.static(frontendPath));
+    try {
+        const fs = await import("fs");
 
-        app.get('*', (req, res, next) => {
-            if (req.path.startsWith('/api')) {
-                return next();
-            }
-            res.sendFile(indexHtml);
-        });
-    } else {
-        console.log('Production mode: Frontend build not found locally, assuming separate deployment.');
+        if (fs.default.existsSync(frontendPath)) {
+            app.use(express.static(frontendPath));
+
+            app.get("*", (req, res, next) => {
+                if (req.path.startsWith("/api")) return next();
+                res.sendFile(path.join(frontendPath, "index.html"));
+            });
+        } else {
+            console.log("Frontend not found. Assuming separate frontend deployment.");
+        }
+    } catch (err) {
+        console.error("Static serving error:", err);
     }
 }
 
-// 404 handler for API or missing production files
+// --------------------
+// 404 handler
+// --------------------
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -107,34 +144,39 @@ app.use((req, res) => {
     });
 });
 
-// Error handling middleware
+// --------------------
+// Global error handler
+// --------------------
 app.use((err, req, res, next) => {
-    console.error('Server Error:', err);
-    res.status(err.status || 500).json({
+    console.error("SERVER ERROR:", err.message);
+    res.status(500).json({
         success: false,
-        message: err.message || 'Internal server error'
+        message: err.message || "Internal Server Error"
     });
 });
 
-// Connect to MongoDB
+// --------------------
+// MongoDB Connection
+// --------------------
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGODB_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        console.log("MongoDB Connected:", conn.connection.host);
     } catch (error) {
-        console.error('MongoDB connection error:', error);
+        console.error("MongoDB Error:", error.message);
         process.exit(1);
     }
 };
 
+// --------------------
 // Start server
+// --------------------
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     await connectDB();
-
     app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
+        console.log(`Server running on port ${PORT}`);
         console.log(`Environment: ${process.env.NODE_ENV}`);
     });
 };
