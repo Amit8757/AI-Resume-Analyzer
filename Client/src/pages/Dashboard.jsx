@@ -90,11 +90,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">
           Welcome back, {user?.name}!
         </h2>
-        <label className="cursor-pointer w-full sm:w-auto">
+        <label className="cursor-pointer">
           <input
             type="file"
             accept=".pdf"
@@ -102,47 +102,47 @@ const Dashboard = () => {
             className="hidden"
             disabled={uploading}
           />
-          <div className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-md text-sm md:text-base">
-            <Upload size={18} />
+          <div className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            <Upload size={20} />
             {uploading ? 'Uploading...' : 'Upload Resume'}
           </div>
         </label>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Resumes</p>
-              <p className="text-2xl md:text-3xl font-bold text-slate-800 mt-1">{stats.totalResumes}</p>
+              <p className="text-slate-600 text-sm">Total Resumes</p>
+              <p className="text-3xl font-bold text-slate-800 mt-1">{stats.totalResumes}</p>
             </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <FileText className="text-blue-600 w-5 h-5 md:w-6 md:h-6" />
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <FileText className="text-blue-600" size={24} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Avg ATS Score</p>
-              <p className="text-2xl md:text-3xl font-bold text-slate-800 mt-1">{stats.avgATSScore}%</p>
+              <p className="text-slate-600 text-sm">Avg ATS Score</p>
+              <p className="text-3xl font-bold text-slate-800 mt-1">{stats.avgATSScore}%</p>
             </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <TrendingUp className="text-green-600 w-5 h-5 md:w-6 md:h-6" />
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <TrendingUp className="text-green-600" size={24} />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200 sm:col-span-2 lg:col-span-1">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Mock Interviews</p>
-              <p className="text-2xl md:text-3xl font-bold text-slate-800 mt-1">{stats.totalInterviews}</p>
+              <p className="text-slate-600 text-sm">Mock Interviews</p>
+              <p className="text-3xl font-bold text-slate-800 mt-1">{stats.totalInterviews}</p>
             </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <Clock className="text-purple-600 w-5 h-5 md:w-6 md:h-6" />
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Clock className="text-purple-600" size={24} />
             </div>
           </div>
         </div>

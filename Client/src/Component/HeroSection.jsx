@@ -2,17 +2,18 @@ import React from 'react'
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-24 md:pt-32 pb-20 px-4 md:px-12 overflow-x-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
+    <section className="relative pt-32 pb-20 px-6 md:px-12 overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
 
-      {/* Background Blobs - Hidden or scaled on mobile to avoid overflow */}
-      <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 md:opacity-30 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 md:opacity-30 animate-blob animation-delay-2000"></div>
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 md:gap-12 items-center relative z-10">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
 
         {/* Left Text */}
         <div className="text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs md:text-sm font-semibold mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-6">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -20,20 +21,20 @@ const HeroSection = () => {
             #1 AI Resume Tool
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 leading-tight tracking-tight mb-6">
-            AI-Powered Resume <br className="hidden md:block" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Analyzer & Coach</span>
+          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight tracking-tight mb-6">
+            AI-Powered Resume <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Analyzer & Coach</span>
           </h1>
 
-          <p className="text-slate-600 text-base md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
+          <p className="text-slate-600 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
             Get personalized feedback on your resume and tailored interview
             questions. Improve your chances of landing your dream job with our advanced AI engine.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start px-4 sm:px-0">
-            <button className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-300 hover:bg-blue-700 hover:scale-105 transition-all duration-200 text-sm md:text-base">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+            <button className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-300 hover:bg-blue-700 hover:scale-105 transition-all duration-200">
               Get Started for Free
             </button>
-            <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all duration-200 text-sm md:text-base">
+            <button className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:border-slate-300 hover:bg-slate-50 transition-all duration-200">
               View Demo
             </button>
           </div>
