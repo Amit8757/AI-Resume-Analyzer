@@ -14,6 +14,7 @@ import MockInterview from "../pages/MockInterview";
 import History from "../pages/History";
 import Preview from "../pages/Preview";
 import AnalysisReport from "../pages/AnalysisReport";
+import ATSOptimizer from "../pages/ATSOptimizer";
 import ProtectedRoute from "../Component/ProtectedRoute";
 
 const AppRoutes = () => {
@@ -35,6 +36,7 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path="builder/:resumeId" element={<ResumeBuilder />} />
           <Route path="report/:resumeId" element={<AnalysisReport />} />
+          <Route path="optimizer/:resumeId" element={<ATSOptimizer />} />
           <Route path="interview" element={<MockInterview />} />
           <Route path="history" element={<History />} />
           <Route path="preview" element={<Preview />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FileText, Upload, Sparkles } from 'lucide-react';
+import { FileText, Upload, Sparkles, Wand2 } from 'lucide-react';
 import { getResume, analyzeResume, uploadResume } from '../services/resumeService';
 import { toast } from 'react-toastify';
 import ATSCompatibilityMeter from '../Component/ATSCompatibilityMeter';
@@ -178,6 +178,16 @@ const ResumeBuilder = () => {
           <Sparkles size={20} />
           {analyzing ? 'Analyzing...' : 'Analyze Resume'}
         </button>
+
+        {resume && resumeId && resumeId !== 'new' && (
+          <button
+            onClick={() => navigate(`/app/optimizer/${resumeId}`)}
+            className="mt-4 ml-3 flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg shadow-purple-200"
+          >
+            <Wand2 size={20} />
+            Optimize with AI
+          </button>
+        )}
 
         {!resume && (
           <p className="mt-2 text-sm text-orange-600">

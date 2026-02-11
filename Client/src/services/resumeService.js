@@ -46,3 +46,11 @@ export const deleteResume = async (id) => {
     const response = await api.delete(`/resumes/${id}`);
     return response.data;
 };
+
+/**
+ * Optimize resume using AI
+ */
+export const optimizeResume = async (id, jobDescription) => {
+    const response = await api.put(`/resumes/${id}/optimize`, { jobDescription });
+    return response.data;
+};

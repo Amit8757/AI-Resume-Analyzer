@@ -22,6 +22,13 @@ const resumeSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    optimizedResume: {
+        type: String,
+        default: ''
+    },
+    optimizedAt: {
+        type: Date
+    },
     analysis: {
         atsScore: {
             type: Number,

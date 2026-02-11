@@ -203,6 +203,83 @@ router.put('/:id/analyze', protect, async (req, res) => {
     }
 });
 
+// @route   PUT /api/resumes/:id/optimize
+// @desc    Optimize resume using AI (Python microservice)
+// @access  Private
+router.put('/:id/optimize', protect, async (req, res) => {
+    try {
+        const { jobDescription } = req.body;
+
+        if (!jobDescription) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a job description'
+            });
+        }
+
+        const resume = await Resume.findById(req.params.id);
+
+        if (!resume) {
+            return res.status(404).json({
+                success: false,
+                message: 'Resume not found'
+            });
+        }
+
+        // Make sure user owns resume
+        if (resume.user.toString() !== req.user.id) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized to access this resume'
+            });
+        }
+
+        if (!resume.extractedText) {
+            return res.status(400).json({
+                success: false,
+                message: 'Resume text not available. Please re-upload.'
+            });
+        }
+
+        // Call Python AI microservice
+        const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5001';
+        const response = await fetch(`${pythonServiceUrl}/optimize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                resumeText: resume.extractedText,
+                jobDescription
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            return res.status(500).json({
+                success: false,
+                message: data.error || 'AI optimization failed'
+            });
+        }
+
+        // Save optimized resume
+        resume.optimizedResume = data.optimizedResume;
+        resume.optimizedAt = new Date();
+        await resume.save();
+
+        res.status(200).json({
+            success: true,
+            optimizedResume: data.optimizedResume,
+            optimizedAt: resume.optimizedAt
+        });
+    } catch (error) {
+        console.error('Optimize resume error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error optimizing resume. Make sure the AI service is running.'
+        });
+    }
+});
+
 // @route   DELETE /api/resumes/:id
 // @desc    Delete resume
 // @access  Private

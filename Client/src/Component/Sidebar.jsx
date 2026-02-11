@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, History, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, History, MessageSquare, LogOut, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
@@ -10,6 +10,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/app" },
+    { icon: Sparkles, label: "ATS Optimizer", path: "/app/optimizer/select" },
     { icon: History, label: "History", path: "/app/history" },
     { icon: MessageSquare, label: "Mock Interview", path: "/app/interview" },
   ];
