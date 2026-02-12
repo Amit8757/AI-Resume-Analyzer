@@ -3,8 +3,8 @@ import api from './api';
 /**
  * Create a new interview session
  */
-export const createInterview = async (jobRole, difficulty = 'Medium') => {
-    const response = await api.post('/interviews', { jobRole, difficulty });
+export const createInterview = async (jobRole, difficulty = 'Medium', resumeId = null) => {
+    const response = await api.post('/interviews', { jobRole, difficulty, resumeId });
     return response.data;
 };
 

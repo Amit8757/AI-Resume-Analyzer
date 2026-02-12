@@ -1,5 +1,6 @@
 import express from 'express';
 import Interview from '../models/Interview.js';
+import Resume from '../models/Resume.js';
 import { protect } from '../middleware/auth.js';
 import { getInterviewQuestions, generateInterviewFeedback } from '../utils/interviewQuestions.js';
 
@@ -10,7 +11,7 @@ const router = express.Router();
 // @access  Private
 router.post('/', protect, async (req, res) => {
     try {
-        const { jobRole, difficulty } = req.body;
+        const { jobRole, difficulty, resumeId } = req.body;
 
         if (!jobRole) {
             return res.status(400).json({
@@ -19,14 +20,47 @@ router.post('/', protect, async (req, res) => {
             });
         }
 
-        // Get random questions for the job role
-        const questionTexts = getInterviewQuestions(jobRole, 5);
+        let questionTexts = [];
+        let resume = null;
+
+        // Try to get AI generated questions if resumeId is provided
+        if (resumeId) {
+            resume = await Resume.findById(resumeId);
+            if (resume && resume.user.toString() === req.user.id && resume.extractedText) {
+                try {
+                    const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5001';
+                    const aiResponse = await fetch(`${pythonServiceUrl}/generate-questions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            resumeText: resume.extractedText,
+                            jobRole
+                        })
+                    });
+
+                    const aiData = await aiResponse.json();
+                    if (aiData.success && aiData.questions && aiData.questions.length > 0) {
+                        questionTexts = aiData.questions;
+                    }
+                } catch (aiError) {
+                    console.error('AI Question Generation Error:', aiError);
+                    // Fallback to static questions below
+                }
+            }
+        }
+
+        // Fallback to static questions if AI fails or no resume
+        if (questionTexts.length === 0) {
+            questionTexts = getInterviewQuestions(jobRole, 5);
+        }
+
         const questions = questionTexts.map(q => ({ question: q, answer: '' }));
 
         // Create interview session
         const interview = await Interview.create({
             user: req.user.id,
             jobRole,
+            resume: resumeId || null,
             difficulty: difficulty || 'Medium',
             questions,
             status: 'in-progress'

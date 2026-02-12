@@ -53,3 +53,30 @@ def build_ats_prompt(resume_text: str, job_description: str) -> str:
         resume_text=resume_text,
         job_description=job_description
     )
+
+INTERVIEW_QUESTION_PROMPT = """
+You are an expert technical interviewer.
+
+Your task:
+1. Analyze the candidate's resume and the target job role.
+2. Generate 5-7 high-quality, challenging interview questions that are specifically tailored to the candidate's experience, projects, and skills mentioned in their resume.
+3. Questions should range from technical deep-dives to behavioral questions based on their past work.
+4. If a specific job role is provided, ensure the questions align with the standard expectations for that role (e.g., Software Engineer, Data Scientist).
+5. Output should be a clean list of questions, one per line, starting with a bullet point (•).
+
+Input:
+Resume:
+{resume_text}
+
+Job Role:
+{job_role}
+
+Output:
+Return only the list of generated interview questions.
+"""
+
+def build_interview_prompt(resume_text: str, job_role: str) -> str:
+    return INTERVIEW_QUESTION_PROMPT.format(
+        resume_text=resume_text,
+        job_role=job_role
+    )

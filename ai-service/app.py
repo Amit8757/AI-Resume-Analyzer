@@ -15,7 +15,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import google.generativeai as genai
 from openai import OpenAI
-from prompts import build_ats_prompt
+from prompts import build_ats_prompt, build_interview_prompt
 
 # Load environment variables
 load_dotenv()
@@ -248,6 +248,81 @@ def optimize_resume():
         return jsonify({
             "success": False,
             "error": f"AI optimization failed: {str(e)}"
+        }), 500
+
+
+@app.route("/generate-questions", methods=["POST"])
+def generate_questions():
+    """
+    Generate interview questions based on resume and job role.
+
+    Request Body:
+        resumeText (str): Extracted text from the resume
+        jobRole (str): Target job role
+
+    Returns:
+        JSON with questions (list): List of generated interview questions
+    """
+    try:
+        # Validate API key based on provider
+        if AI_PROVIDER == "gemini":
+            if not GEMINI_API_KEY or GEMINI_API_KEY == "your_gemini_api_key_here":
+                return jsonify({"success": False, "error": "Gemini API key not configured"}), 500
+        elif AI_PROVIDER == "huggingface":
+            if not HUGGINGFACE_API_KEY or HUGGINGFACE_API_KEY == "your_huggingface_token_here":
+                return jsonify({"success": False, "error": "Hugging Face API key not configured"}), 500
+        elif AI_PROVIDER == "openai":
+            if not OPENAI_API_KEY or OPENAI_API_KEY.startswith("your_"):
+                return jsonify({
+                    "success": False,
+                    "error": "OpenAI API key not configured. Set OPENAI_API_KEY in ai-service/.env"
+                }), 500
+        # Ollama doesn't need API key validation
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "Request body is required"}), 400
+
+        resume_text = data.get("resumeText", "").strip()
+        job_role = data.get("jobRole", "Software Engineer").strip()
+
+        if not resume_text:
+            return jsonify({"success": False, "error": "Resume text is required"}), 400
+
+        # Build prompt
+        prompt = build_interview_prompt(resume_text, job_role)
+
+        # Call AI API
+        if AI_PROVIDER == "gemini":
+            model = get_gemini_model()
+            response = model.generate_content(prompt)
+            output = response.text.strip()
+        elif AI_PROVIDER == "huggingface":
+            output = call_huggingface_api(prompt)
+        elif AI_PROVIDER == "openai":
+            output = call_openai_api(prompt)
+        elif AI_PROVIDER == "ollama":
+            output = call_ollama_api(prompt)
+        else:
+            return jsonify({"success": False, "error": f"Unknown AI provider: {AI_PROVIDER}"}), 500
+
+        # Parse questions from output (expects bullet points)
+        questions = [q.strip().replace('•', '').strip() for q in output.split('\n') if q.strip().startswith('•') or q.strip().startswith('-') or (q.strip() and q.strip()[0].isdigit() and '.' in q.strip()[:3])]
+        
+        # Fallback if parsing fails - just take all non-empty lines
+        if not questions:
+            questions = [line.strip() for line in output.split('\n') if line.strip() and len(line) > 10]
+
+        return jsonify({
+            "success": True,
+            "questions": questions[:7] # Stick to 5-7 questions
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": f"Failed to generate questions: {str(e)}"
         }), 500
 
 

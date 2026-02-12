@@ -11,6 +11,10 @@ const interviewSchema = new mongoose.Schema({
         required: true,
         enum: ['Software Engineer', 'Data Scientist', 'Product Manager', 'Designer', 'Marketing', 'Sales', 'General']
     },
+    resume: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Resume'
+    },
     difficulty: {
         type: String,
         default: 'Medium',

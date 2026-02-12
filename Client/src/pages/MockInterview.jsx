@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Send, CheckCircle, TrendingUp, Clock } from 'lucide-react';
+import { MessageSquare, Send, CheckCircle, TrendingUp, Clock, FileText } from 'lucide-react';
 import { createInterview, getInterviews, submitAnswer, completeInterview } from '../services/interviewService';
+import { getResumes } from '../services/resumeService';
 import { toast } from 'react-toastify';
 
 const MockInterview = () => {
   const navigate = useNavigate();
   const [interviews, setInterviews] = useState([]);
+  const [resumes, setResumes] = useState([]);
   const [currentInterview, setCurrentInterview] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [selectedRole, setSelectedRole] = useState('Software Engineer');
+  const [selectedResumeId, setSelectedResumeId] = useState('');
 
   const jobRoles = [
     'Software Engineer',
@@ -26,6 +29,7 @@ const MockInterview = () => {
 
   useEffect(() => {
     fetchInterviews();
+    fetchResumes();
   }, []);
 
   const fetchInterviews = async () => {
@@ -37,10 +41,19 @@ const MockInterview = () => {
     }
   };
 
+  const fetchResumes = async () => {
+    try {
+      const data = await getResumes();
+      setResumes(data.resumes || []);
+    } catch (error) {
+      console.error('Error fetching resumes:', error);
+    }
+  };
+
   const handleStartInterview = async () => {
     setLoading(true);
     try {
-      const data = await createInterview(selectedRole);
+      const data = await createInterview(selectedRole, 'Medium', selectedResumeId);
       setCurrentInterview(data.interview);
       setCurrentQuestionIndex(0);
       setAnswer('');
@@ -262,17 +275,37 @@ const MockInterview = () => {
             Practice your interview skills with role-specific questions and get detailed feedback on your responses.
           </p>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Select Job Role</label>
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full max-w-md mx-auto border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {jobRoles.map((role) => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left max-w-2xl mx-auto">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Select Job Role</label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {jobRoles.map((role) => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Select Resume (Optional)
+                <span className="text-xs text-slate-400 block font-normal">Base questions on your resume</span>
+              </label>
+              <select
+                value={selectedResumeId}
+                onChange={(e) => setSelectedResumeId(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={resumes.length === 0}
+              >
+                <option value="">Static Questions (General)</option>
+                {resumes.map((resume) => (
+                  <option key={resume._id} value={resume._id}>{resume.originalName}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <button
@@ -312,8 +345,8 @@ const MockInterview = () => {
                     </div>
                   )}
                   <span className={`px-3 py-1 rounded-full text-sm ${interview.status === 'completed'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-yellow-100 text-yellow-700'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-yellow-100 text-yellow-700'
                     }`}>
                     {interview.status === 'completed' ? 'Completed' : 'In Progress'}
                   </span>
