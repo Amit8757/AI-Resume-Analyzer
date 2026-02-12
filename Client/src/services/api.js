@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Create axios instance with base URL
-let baseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'https://ai-resume-analyzer-8eki.onrender.com/api');
+let baseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 // Auto-fix: Ensure /api suffix if it's an absolute URL and it's missing
 if (baseURL.startsWith('http') && !baseURL.endsWith('/api') && !baseURL.includes('/api/')) {

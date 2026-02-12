@@ -10,7 +10,8 @@
         "build:server": "npm install",
         "start": "node server/server.js",
         "server": "node server/server.js",
-        "client": "npm run dev --prefix Client"
+        "client": "npm run dev --prefix Client",
+        "ai": "cd ai-service && python ai-service.py"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",

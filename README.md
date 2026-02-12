@@ -120,6 +120,27 @@ npm run dev
 
 The frontend will run on `http://localhost:5173`
 
+### AI Service Setup (Python)
+
+1. Navigate to the ai-service directory:
+```bash
+cd ai-service
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Configure your API keys in `ai-service/.env`.
+
+4. Start the AI service:
+```bash
+python ai-service.py
+```
+
+The AI service will run on `http://localhost:5001`.
+
 ## Usage
 
 ### 1. Register/Login

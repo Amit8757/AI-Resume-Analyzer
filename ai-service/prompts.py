@@ -49,10 +49,7 @@ def build_ats_prompt(resume_text: str, job_description: str) -> str:
     Returns:
         Complete prompt string ready to send to Gemini API
     """
-    return ATS_OPTIMIZATION_PROMPT.format(
-        resume_text=resume_text,
-        job_description=job_description
-    )
+    return ATS_OPTIMIZATION_PROMPT.replace("{resume_text}", resume_text).replace("{job_description}", job_description)
 
 INTERVIEW_QUESTION_PROMPT = """
 You are an expert technical interviewer.
@@ -76,7 +73,4 @@ Return only the list of generated interview questions.
 """
 
 def build_interview_prompt(resume_text: str, job_role: str) -> str:
-    return INTERVIEW_QUESTION_PROMPT.format(
-        resume_text=resume_text,
-        job_role=job_role
-    )
+    return INTERVIEW_QUESTION_PROMPT.replace("{resume_text}", resume_text).replace("{job_role}", job_role)

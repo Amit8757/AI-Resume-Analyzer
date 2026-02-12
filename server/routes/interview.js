@@ -25,32 +25,57 @@ router.post('/', protect, async (req, res) => {
 
         // Try to get AI generated questions if resumeId is provided
         if (resumeId) {
-            resume = await Resume.findById(resumeId);
-            if (resume && resume.user.toString() === req.user.id && resume.extractedText) {
-                try {
-                    const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5001';
-                    const aiResponse = await fetch(`${pythonServiceUrl}/generate-questions`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            resumeText: resume.extractedText,
-                            jobRole
-                        })
-                    });
+            // Validate if resumeId is a valid MongoDB ObjectId
+            if (!mongoose.Types.ObjectId.isValid(resumeId)) {
+                console.warn(`Invalid resumeId provided: ${resumeId}`);
+            } else {
+                resume = await Resume.findById(resumeId);
 
-                    const aiData = await aiResponse.json();
-                    if (aiData.success && aiData.questions && aiData.questions.length > 0) {
-                        questionTexts = aiData.questions;
+                if (resume && resume.user.toString() === req.user.id && resume.extractedText) {
+                    try {
+                        const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5001';
+                        console.log(`Requesting questions from AI Service: ${pythonServiceUrl}`);
+
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+                        const aiResponse = await fetch(`${pythonServiceUrl}/generate-questions`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                resumeText: resume.extractedText,
+                                jobRole
+                            }),
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (aiResponse.ok) {
+                            const aiData = await aiResponse.json();
+                            if (aiData.success && aiData.questions && aiData.questions.length > 0) {
+                                questionTexts = aiData.questions;
+                                console.log(`Successfully generated ${questionTexts.length} questions via AI`);
+                            }
+                        } else {
+                            const errorText = await aiResponse.text();
+                            console.error(`AI Service error (${aiResponse.status}):`, errorText);
+                        }
+                    } catch (aiError) {
+                        if (aiError.name === 'AbortError') {
+                            console.error('AI Question Generation Timeout');
+                        } else {
+                            console.error('AI Question Generation Error:', aiError.message);
+                        }
+                        // Fallback to static questions below
                     }
-                } catch (aiError) {
-                    console.error('AI Question Generation Error:', aiError);
-                    // Fallback to static questions below
                 }
             }
         }
 
         // Fallback to static questions if AI fails or no resume
         if (questionTexts.length === 0) {
+            console.log('Using fallback static questions');
             questionTexts = getInterviewQuestions(jobRole, 5);
         }
 
@@ -60,7 +85,7 @@ router.post('/', protect, async (req, res) => {
         const interview = await Interview.create({
             user: req.user.id,
             jobRole,
-            resume: resumeId || null,
+            resume: mongoose.Types.ObjectId.isValid(resumeId) ? resumeId : null,
             difficulty: difficulty || 'Medium',
             questions,
             status: 'in-progress'
@@ -74,7 +99,7 @@ router.post('/', protect, async (req, res) => {
         console.error('Create interview error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error creating interview session'
+            message: 'Error creating interview session: ' + error.message
         });
     }
 });
