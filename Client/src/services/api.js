@@ -13,6 +13,8 @@ if (import.meta.env.PROD) {
     console.log('Final Base URL being used:', baseURL);
 }
 
+export const API_BASE_URL = baseURL;
+
 const api = axios.create({
     baseURL,
     headers: {

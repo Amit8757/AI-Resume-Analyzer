@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import AuthHeader from '../Component/AuthHeader';
-import AuthFooter from '../Component/AuthFooter';
+import { API_BASE_URL } from '../services/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -105,11 +105,9 @@ const Login = () => {
           <div className="space-y-3">
             <button
               onClick={() => {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const baseUrl = apiUrl.replace(/\/api$/, '');
-                console.log('Environment:', import.meta.env.PROD ? 'Production' : 'Development');
-                console.log('Detected API URL:', apiUrl);
+                const baseUrl = API_BASE_URL.replace(/\/api$/, '');
                 console.log('Redirecting to:', `${baseUrl}/api/oauth/google`);
+                console.log('Full URL:', window.location.origin);
                 window.location.href = `${baseUrl}/api/oauth/google`;
               }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
@@ -125,8 +123,7 @@ const Login = () => {
 
             <button
               onClick={() => {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                const baseUrl = apiUrl.replace(/\/api$/, '');
+                const baseUrl = API_BASE_URL.replace(/\/api$/, '');
                 window.location.href = `${baseUrl}/api/oauth/github`;
               }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
