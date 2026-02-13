@@ -24,6 +24,9 @@ const __dirname = path.dirname(__filename);
 // --------------------
 const app = express();
 
+// Simple diagnostic route
+app.get("/ping", (req, res) => res.send("pong"));
+
 // --------------------
 // CORS CONFIG (VERY IMPORTANT)
 // --------------------
