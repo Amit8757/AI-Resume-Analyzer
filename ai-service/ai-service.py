@@ -44,10 +44,29 @@ elif AI_PROVIDER == "openai":
 elif AI_PROVIDER == "ollama":
     print(f"Using Ollama at {OLLAMA_BASE_URL} with model {OLLAMA_MODEL}")
 
+# AI API Key (for internal service authentication)
+AI_SERVICE_API_KEY = os.getenv("AI_SERVICE_API_KEY")
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests from Node.js server
 
+# Decorator to check for API key
+def require_api_key(f):
+    def decorated_function(*args, **kwargs):
+        if not AI_SERVICE_API_KEY:
+            # If not configured, allow (optional, for dev)
+            return f(*args, **kwargs)
+        
+        request_key = request.headers.get("X-API-Key")
+        if request_key != AI_SERVICE_API_KEY:
+            return jsonify({
+                "success": False,
+                "error": "Unauthorized: Invalid API key"
+            }), 401
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 # ─── AI Model Configuration ─────────────────────────────────────────────────
 def get_gemini_model():
@@ -161,6 +180,7 @@ def health_check():
 
 
 @app.route("/optimize", methods=["POST"])
+@require_api_key
 def optimize_resume():
     """
     Optimize a resume for ATS compatibility using Google Gemini AI.
@@ -252,6 +272,7 @@ def optimize_resume():
 
 
 @app.route("/generate-questions", methods=["POST"])
+@require_api_key
 def generate_questions():
     """
     Generate interview questions based on resume and job role.

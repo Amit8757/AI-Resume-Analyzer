@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport.js";
 import path from "path";
@@ -18,11 +18,6 @@ import oauthRoutes from "./routes/oauth.js";
 // --------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// --------------------
-// Load env variables
-// --------------------
-dotenv.config();
 
 // --------------------
 // Initialize app
@@ -82,7 +77,7 @@ app.use(express.urlencoded({ extended: true }));
 // --------------------
 app.use(
     session({
-        secret: process.env.SESSION_SECRET || "fallback-secret",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: {
@@ -120,27 +115,31 @@ app.get("/api/health", (req, res) => {
 });
 
 // --------------------
-// Serve frontend ONLY if built locally
+// Serve frontend
 // --------------------
-if (process.env.NODE_ENV === "production") {
-    const frontendPath = path.join(__dirname, "../Client/dist");
+const frontendPath = path.join(__dirname, "../Client/dist");
 
-    try {
-        const fs = await import("fs");
+// Standard built-in fs is needed for sync check
+import fs from "fs";
 
-        if (fs.default.existsSync(frontendPath)) {
-            app.use(express.static(frontendPath));
+if (fs.existsSync(frontendPath)) {
+    console.log("Serving frontend from:", frontendPath);
+    app.use(express.static(frontendPath));
 
-            app.get("*", (req, res, next) => {
-                if (req.path.startsWith("/api")) return next();
-                res.sendFile(path.join(frontendPath, "index.html"));
-            });
-        } else {
-            console.log("Frontend not found. Assuming separate frontend deployment.");
-        }
-    } catch (err) {
-        console.error("Static serving error:", err);
-    }
+    // CATCH-ALL ROUTE: Redirect all non-API GET requests to index.html
+    // This allows React Router to handle URLs like /app, /login, etc. on refresh
+    app.get("*", (req, res, next) => {
+        // Skip for API routes
+        if (req.path.startsWith("/api")) return next();
+
+        // Skip for file extensions (images, scripts, etc.) if they weren't found in express.static
+        if (path.extname(req.path)) return next();
+
+        res.sendFile(path.join(frontendPath, "index.html"));
+    });
+} else {
+    console.warn("WARNING: Frontend 'dist' folder not found at:", frontendPath);
+    console.warn("If this is production, ensure you have run 'npm run build' in the Client directory.");
 }
 
 // --------------------

@@ -245,7 +245,10 @@ router.put('/:id/optimize', protect, async (req, res) => {
         const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5001';
         const response = await fetch(`${pythonServiceUrl}/optimize`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.AI_SERVICE_API_KEY
+            },
             body: JSON.stringify({
                 resumeText: resume.extractedText,
                 jobDescription

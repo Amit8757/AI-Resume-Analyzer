@@ -20,6 +20,10 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // Google OAuth Strategy (only if credentials are configured)
+console.log('Checking Google OAuth config...');
+console.log('GOOGLE_CLIENT_ID exists:', !!process.env.GOOGLE_CLIENT_ID);
+console.log('GOOGLE_CLIENT_ID value matches placeholder:', process.env.GOOGLE_CLIENT_ID === 'your_google_client_id_here');
+
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID !== 'your_google_client_id_here') {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,

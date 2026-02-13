@@ -11,6 +11,20 @@ const generateToken = (id) => {
     });
 };
 
+// @route   GET /api/oauth/debug
+// @desc    Debug passport strategies
+// @access  Public
+router.get('/debug', (req, res) => {
+    res.json({
+        strategies: Object.keys(passport._strategies),
+        env: {
+            hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+            clientIdStart: process.env.GOOGLE_CLIENT_ID?.substring(0, 10),
+            callbackUrl: process.env.GOOGLE_CALLBACK_URL
+        }
+    });
+});
+
 // @route   GET /api/oauth/google
 // @desc    Initiate Google OAuth
 // @access  Public
