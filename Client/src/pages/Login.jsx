@@ -105,10 +105,25 @@ const Login = () => {
           <div className="space-y-3">
             <button
               onClick={() => {
-                const baseUrl = API_BASE_URL.replace(/\/api$/, '');
-                console.log('Redirecting to:', `${baseUrl}/api/oauth/google`);
-                console.log('Full URL:', window.location.origin);
-                window.location.href = `${baseUrl}/api/oauth/google`;
+                const apiBase = API_BASE_URL;
+                console.log('[OAuth]: Starting Google Login flow');
+                console.log('[OAuth]: API_BASE_URL =', apiBase);
+
+                // If it's relative or pointing to the same domain, it's likely for a unified deployment.
+                // In split deployment, this will be wrong if VITE_API_URL wasn't built correctly.
+                const isRelative = apiBase.startsWith('/');
+                const isLocalDomain = apiBase.includes(window.location.hostname);
+
+                if (import.meta.env.PROD && (isRelative || isLocalDomain)) {
+                  console.error('[OAuth]: CRITICAL CONFIG WARNING - Frontend is trying to call itself for OAuth.');
+                  console.error('[OAuth]: This usually means VITE_API_URL was not set during the Render build.');
+                }
+
+                const baseUrl = apiBase.replace(/\/api$/, '');
+                const targetUrl = `${baseUrl}/api/oauth/google`;
+                console.log('[OAuth]: Redirecting to:', targetUrl);
+
+                window.location.href = targetUrl;
               }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
             >

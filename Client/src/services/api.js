@@ -3,20 +3,22 @@ import axios from 'axios';
 // Create axios instance with base URL
 let baseURL = import.meta.env.VITE_API_URL;
 
-if (!baseURL) {
-    if (import.meta.env.PROD) {
-        // In production, fallback to /api (unified) OR warn if it's likely a split deployment
+if (import.meta.env.PROD) {
+    console.log('[API CONFIG]: Build Environment: Production');
+    if (!baseURL) {
+        console.error('[API CONFIG]: ERROR - VITE_API_URL is undefined.');
+        console.warn('[API CONFIG]: Falling back to relative path "/api". This WILL FAIL on split Render deployments.');
         baseURL = '/api';
-        console.warn('WARNING: VITE_API_URL is NOT set in Production.');
-        console.warn('Falling back to relative path "/api". This will FAIL if frontend and backend are on different URLs.');
     } else {
-        baseURL = 'http://localhost:5000/api';
+        console.log('[API CONFIG]: VITE_API_URL detected:', baseURL);
     }
+} else {
+    baseURL = baseURL || 'http://localhost:5000/api';
 }
 
-if (import.meta.env.PROD) {
-    console.log('API Service initialized in Production mode');
-    console.log('Final Base URL being used:', baseURL);
+// Ensure /api suffix
+if (baseURL && baseURL.startsWith('http') && !baseURL.endsWith('/api') && !baseURL.includes('/api/')) {
+    baseURL = baseURL.replace(/\/$/, '') + '/api';
 }
 
 export const API_BASE_URL = baseURL;
