@@ -24,9 +24,6 @@ const __dirname = path.dirname(__filename);
 // --------------------
 const app = express();
 
-// Simple diagnostic route
-app.get("/ping", (req, res) => res.send("pong"));
-
 // --------------------
 // CORS CONFIG (VERY IMPORTANT)
 // --------------------
@@ -100,10 +97,8 @@ app.use(passport.session());
 // --------------------
 // API Routes
 // --------------------
-console.log('Mounting API routes...');
 app.use("/api/auth", authRoutes);
 app.use("/api/oauth", oauthRoutes);
-console.log('OAuth routes mounted at /api/oauth');
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/interviews", interviewRoutes);
 
