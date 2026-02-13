@@ -1,11 +1,17 @@
 import axios from 'axios';
 
 // Create axios instance with base URL
-let baseURL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+let baseURL = import.meta.env.VITE_API_URL;
 
-// Auto-fix: Ensure /api suffix if it's an absolute URL and it's missing
-if (baseURL.startsWith('http') && !baseURL.endsWith('/api') && !baseURL.includes('/api/')) {
-    baseURL = baseURL.replace(/\/$/, '') + '/api';
+if (!baseURL) {
+    if (import.meta.env.PROD) {
+        // In production, fallback to /api (unified) OR warn if it's likely a split deployment
+        baseURL = '/api';
+        console.warn('WARNING: VITE_API_URL is NOT set in Production.');
+        console.warn('Falling back to relative path "/api". This will FAIL if frontend and backend are on different URLs.');
+    } else {
+        baseURL = 'http://localhost:5000/api';
+    }
 }
 
 if (import.meta.env.PROD) {
