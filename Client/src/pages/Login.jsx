@@ -107,6 +107,9 @@ const Login = () => {
               onClick={() => {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
                 const baseUrl = apiUrl.replace(/\/api$/, '');
+                console.log('Environment:', import.meta.env.PROD ? 'Production' : 'Development');
+                console.log('Detected API URL:', apiUrl);
+                console.log('Redirecting to:', `${baseUrl}/api/oauth/google`);
                 window.location.href = `${baseUrl}/api/oauth/google`;
               }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
