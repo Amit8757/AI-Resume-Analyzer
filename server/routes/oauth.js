@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
+console.log('--- OAuth Router Loaded ---');
+
 // Generate JWT Token
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -28,9 +30,17 @@ router.get('/debug', (req, res) => {
 // @route   GET /api/oauth/google
 // @desc    Initiate Google OAuth
 // @access  Public
-router.get('/google', passport.authenticate('google', {
+router.get('/google', (req, res, next) => {
+    console.log('GET /api/oauth/google called');
+    console.log('Strategies registered:', Object.keys(passport._strategies));
+    next();
+}, passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
+
+router.get('/test', (req, res) => {
+    res.send('OAuth Router is working!');
+});
 
 // @route   GET /api/oauth/google/callback
 // @desc    Google OAuth callback

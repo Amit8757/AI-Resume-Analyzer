@@ -97,8 +97,10 @@ app.use(passport.session());
 // --------------------
 // API Routes
 // --------------------
+console.log('Mounting API routes...');
 app.use("/api/auth", authRoutes);
 app.use("/api/oauth", oauthRoutes);
+console.log('OAuth routes mounted at /api/oauth');
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/interviews", interviewRoutes);
 
