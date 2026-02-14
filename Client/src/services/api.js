@@ -4,11 +4,11 @@ import axios from 'axios';
 let baseURL = import.meta.env.VITE_API_URL;
 
 // Fail-safe for Render split deployment:
-// If VITE_API_URL is missing but we're on the known Render frontend, force the backend URL.
-if (import.meta.env.PROD && !baseURL && typeof window !== 'undefined') {
+// If VITE_API_URL is missing, relative, or default but we're on the known Render frontend, force the backend URL.
+if (import.meta.env.PROD && (!baseURL || baseURL === '/api' || baseURL.startsWith('/')) && typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname.includes('ai-resume-analyzer-1-vz59.onrender.com')) {
-        console.log('[API CONFIG]: Fail-safe triggered. Using hardcoded Render backend URL.');
+        console.log('[API CONFIG]: Fail-safe triggered. Using hardcoded Render backend URL:', 'https://ai-resume-analyzer-8eki.onrender.com/api');
         baseURL = 'https://ai-resume-analyzer-8eki.onrender.com/api';
     }
 }
