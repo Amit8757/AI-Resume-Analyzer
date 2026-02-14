@@ -3,6 +3,16 @@ import axios from 'axios';
 // Create axios instance with base URL
 let baseURL = import.meta.env.VITE_API_URL;
 
+// Fail-safe for Render split deployment:
+// If VITE_API_URL is missing but we're on the known Render frontend, force the backend URL.
+if (import.meta.env.PROD && !baseURL && typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('ai-resume-analyzer-1-vz59.onrender.com')) {
+        console.log('[API CONFIG]: Fail-safe triggered. Using hardcoded Render backend URL.');
+        baseURL = 'https://ai-resume-analyzer-8eki.onrender.com/api';
+    }
+}
+
 if (import.meta.env.PROD) {
     console.log('[API CONFIG]: Build Environment: Production');
     if (!baseURL) {
@@ -10,7 +20,7 @@ if (import.meta.env.PROD) {
         console.warn('[API CONFIG]: Falling back to relative path "/api". This WILL FAIL on split Render deployments.');
         baseURL = '/api';
     } else {
-        console.log('[API CONFIG]: VITE_API_URL detected:', baseURL);
+        console.log('[API CONFIG]: VITE_API_URL detected or forced:', baseURL);
     }
 } else {
     baseURL = baseURL || 'http://localhost:5000/api';

@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader } from 'lucide-react';
+import { API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+
 
 const OAuthCallback = () => {
     const navigate = useNavigate();
@@ -31,9 +33,8 @@ const OAuthCallback = () => {
                 // Store token
                 localStorage.setItem('token', token);
 
-                // Fetch user data
-                const apiBase = import.meta.env.PROD ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
-                const response = await fetch(`${apiBase}/auth/me`, {
+                // Fetch user data using API_BASE_URL
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
