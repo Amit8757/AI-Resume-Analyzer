@@ -16,7 +16,9 @@ const Sidebar = () => {
   ];
 
   const handleLogout = () => {
+    console.log('[Sidebar] User initiated logout');
     logout();
+    console.log('[Sidebar] Navigating to /login');
     navigate('/login');
   };
 

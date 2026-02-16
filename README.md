@@ -29,6 +29,7 @@ A full-stack web application that helps job seekers optimize their resumes using
 - User registration and login
 - Protected routes
 - Persistent sessions
+- **Google & GitHub OAuth Support**
 
 ## Tech Stack
 
@@ -49,6 +50,7 @@ A full-stack web application that helps job seekers optimize their resumes using
 - **Bcrypt** - Password hashing
 - **Multer** - File uploads
 - **PDF-Parse** - PDF text extraction
+- **Passport.js** - OAuth strategies
 
 ## Installation & Setup
 

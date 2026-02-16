@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        console.log('[AuthContext] Logout called - clearing state');
         logoutService();
         setUser(null);
     };
