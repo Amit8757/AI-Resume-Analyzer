@@ -105,29 +105,10 @@ const Login = () => {
           <div className="space-y-3">
             <button
               onClick={() => {
-                const apiBase = API_BASE_URL;
-                console.log('[OAuth]: Starting Google Login flow');
-                console.log('[OAuth]: API_BASE_URL =', apiBase);
-
-                // If it's relative or pointing to the same domain, it's likely for a unified deployment.
-                // In split deployment, this will be wrong if VITE_API_URL wasn't built correctly.
-                const isRelative = apiBase.startsWith('/');
-                const isLocalDomain = apiBase.includes(window.location.hostname);
-
-                if (import.meta.env.PROD && (isRelative || isLocalDomain)) {
-                  console.warn('[OAuth]: WARNING - API_BASE_URL is relative or local. Forcing backend URL for OAuth redirect.');
-                }
-
-                let baseUrl = apiBase.replace(/\/api$/, '');
-
-                // FORCE ABSOLUTE URL if we are in production and it's relative
-                if (import.meta.env.PROD && (!baseUrl || baseUrl.startsWith('/'))) {
-                  baseUrl = 'https://ai-resume-analyzer-8eki.onrender.com';
-                }
-
-                const targetUrl = `${baseUrl}/api/oauth/google`;
-                console.log('[OAuth]: Redirecting to:', targetUrl);
-
+                // HARDCODED BACKEND URL FOR PRODUCTION
+                const backendUrl = 'https://ai-resume-analyzer-8eki.onrender.com';
+                const targetUrl = `${backendUrl}/api/oauth/google`;
+                console.log('[OAuth]: Force Redirecting to:', targetUrl);
                 window.location.href = targetUrl;
               }}
               className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
